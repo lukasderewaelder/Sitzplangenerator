@@ -786,7 +786,7 @@
     <button id="btnGen" class="btn primary" title="Neu anordnen"><svg class="ic" viewBox="0 0 24 24" data-ic="shuffle" aria-hidden="true"></svg><span>Neu anordnen</span></button>
     <button id="btnBeamerExit" class="btn" type="button" hidden><svg class="ic" viewBox="0 0 24 24" data-ic="exit" aria-hidden="true"></svg><span>Beamer beenden</span></button>
   </div>
-  <input type="file" id="fileIn" accept=".json,application/json" hidden>
+  <input type="file" id="fileIn" accept=".json,.txt,application/json,text/plain" hidden>
 </header>
 
 <div id="tabPlan" class="tabpane ws" role="tabpanel" aria-labelledby="tabBtnPlan">
@@ -1035,22 +1035,78 @@ function kurztext(v,max){
   return v.length>max?v.slice(0,max).trim():v;
 }
 function datenFehler(text){var e=new Error(text);e.datenFehler=true;return e;}
+/* Zahlen als Kennung (ältere oder von Hand erstellte Dateien) wie Text behandeln */
+function alsId(v){return(typeof v==="number"&&isFinite(v))?String(v):v;}
+/* Rastergröße der ersten Fassung – je nach Stand oben oder in einem Unterobjekt gespeichert */
+function rasterMasse(p){
+  var quellen=[p,p.room,p.grid,p.layout,p.raster,p.raum];
+  for(var i=0;i<quellen.length;i++){
+    var q=quellen[i];
+    if(q&&typeof q==="object"&&q.rows!==undefined&&q.cols!==undefined)return{rows:q.rows,cols:q.cols};
+  }
+  return null;
+}
 function versionVon(p){
-  if(typeof p.v==="number"&&isFinite(p.v))return p.v;
-  if(Array.isArray(p.tables))return 2;
-  if(p.seats&&typeof p.seats==="object"&&!Array.isArray(p.seats))return 1;
-  if(p.rows!==undefined&&p.cols!==undefined&&!p.room)return 1;      /* erste Fassung ohne Platzangaben */
+  var v=(typeof p.v==="number"&&isFinite(p.v))?p.v:((typeof p.v==="string"&&/^\s*\d+\s*$/.test(p.v))?Number(p.v):null);
+  if(Array.isArray(p.tables))return(v!==null&&v>=2)?v:2;
+  if(v!==null&&v>=2)return v;
+  if(p.seats&&typeof p.seats==="object")return 1;                 /* erste Fassung: Raster aus Plätzen */
+  if(rasterMasse(p)||v===1)return 1;
   return 0;
+}
+/* Sicherungen, die in einer Hülle stecken („state“, „plan“, „daten“ …) oder als Liste gespeichert wurden */
+function auspacken(p){
+  for(var i=0;i<4;i++){
+    if(Array.isArray(p)){
+      var f=p.filter(function(x){return x&&typeof x==="object"&&!Array.isArray(x)&&(x.students||x.tables);})[0];
+      if(!f)return p;
+      p=f;continue;
+    }
+    if(p&&typeof p==="object"&&!p.students&&!p.tables){
+      var k=["state","plan","sitzplan","daten","data","inhalt","sicherung"].filter(function(k){return p[k]&&typeof p[k]==="object";})[0];
+      if(k){p=p[k];continue;}
+    }
+    break;
+  }
+  return p;
+}
+/* Klassenliste auch als Objekt (Kennung → Person) oder als reine Namensliste annehmen */
+function schuelerListe(l){
+  if(l&&typeof l==="object"&&!Array.isArray(l)){
+    l=Object.keys(l).map(function(k){
+      var x=l[k];
+      if(typeof x==="string")return{id:k,name:x};
+      if(x&&typeof x==="object"&&!Array.isArray(x)){
+        var c={};Object.keys(x).forEach(function(j){c[j]=x[j];});
+        if(c.id===undefined)c.id=k;
+        return c;
+      }
+      return x;
+    });
+  }
+  if(!Array.isArray(l))return l;
+  return l.map(function(x){return(typeof x==="string")?{name:x}:x;});
 }
 /* Prüft eine Sicherung bzw. den gespeicherten Stand vollständig, hebt ältere Fassungen
    auf das aktuelle Format und bereinigt Unstimmigkeiten. Wirft bei unbrauchbaren Daten. */
 function pruefeUndMigriere(roh){
-  if(!roh||typeof roh!=="object"||Array.isArray(roh))throw datenFehler("Die Datei enthält keinen Sitzplan.");
-  var p=JSON.parse(JSON.stringify(roh));
+  var p=auspacken(roh);
+  if(!p||typeof p!=="object"||Array.isArray(p))throw datenFehler("Die Datei enthält keinen Sitzplan.");
+  p=JSON.parse(JSON.stringify(p));
+  if(p.students!==undefined)p.students=schuelerListe(p.students);
   var v=versionVon(p),H=[];
   if(v>SCHEMA)throw datenFehler("Die Sicherung stammt aus einer neueren Fassung des Sitzplan-Generators. Bitte die aktuelle Fassung verwenden.");
-  if(v<1||!Array.isArray(p.students))throw datenFehler("In der Datei wurde kein Sitzplan gefunden.");
+  if(!Array.isArray(p.students)){
+    if(v>=1&&(Array.isArray(p.tables)||p.room))p.students=[];      /* Raum ohne Klasse (z. B. nur der Raum gesichert) */
+    else throw datenFehler("In der Datei wurde kein Sitzplan gefunden – weder Klassenliste noch Raum.");
+  }
   if(v===1)p=migriereV1(p,H);
+  else if(v<1){
+    /* Aufbau unbekannt, aber eine Klassenliste ist da: Klasse und Regeln übernehmen, Raum neu */
+    var a=vorlageA();
+    p.room={cols:a.cols,rows:a.rows,furniture:a.furniture};p.tables=a.tables;p.arrangement={};p.seatMeta={};
+    H.push("Raum und Sitzordnung ließen sich aus dieser älteren Datei nicht lesen. Klassenliste, Platzmerkmale und Regeln wurden übernommen; als Raum steht das Standard-Klassenzimmer bereit.");
+  }
   return{state:normalisiere(p,H),hinweise:H,version:v};
 }
 function migrate(p){return pruefeUndMigriere(p).state;}      /* älterer Name */
@@ -1060,13 +1116,37 @@ function normGroup(g){
 }
 /* Version 1: Raster aus Einzelplätzen („Reihe_Spalte“) → jeder Platz wird ein Einzeltisch */
 function migriereV1(p,H){
-  var rows=ganzzahl(p.rows,1,14,4), cols=ganzzahl(p.cols,1,14,6);
+  /* Platzschlüssel „Reihe_Spalte“ – auch „Reihe-Spalte“, „Reihe,Spalte“, „r2c3“ … */
+  function rcLesen(k){var m=/^\D*(\d{1,2})\D+(\d{1,2})\D*$/.exec(String(k));return m?{r:+m[1],c:+m[2]}:null;}
+  var altSitz={},altArr={},roh;
+  roh=p.seats;
+  if(Array.isArray(roh)){
+    roh.forEach(function(z,r){
+      if(Array.isArray(z))z.forEach(function(m,c){if(m&&typeof m==="object")altSitz[r+"_"+c]=m;});
+      else if(z&&typeof z==="object"){var rr=ganzzahl(z.row!==undefined?z.row:z.r,0,99,-1),cc=ganzzahl(z.col!==undefined?z.col:z.c,0,99,-1);if(rr>=0&&cc>=0)altSitz[rr+"_"+cc]=z;}
+    });
+  }else if(roh&&typeof roh==="object")Object.keys(roh).forEach(function(k){var x=rcLesen(k);if(x)altSitz[x.r+"_"+x.c]=roh[k];});
+  roh=p.arrangement;
+  if(Array.isArray(roh)){
+    roh.forEach(function(z,r){
+      if(Array.isArray(z))z.forEach(function(sid,c){if(sid!==null&&sid!==undefined&&sid!=="")altArr[r+"_"+c]=alsId(sid);});
+      else if(z&&typeof z==="object"){
+        var rr=ganzzahl(z.row!==undefined?z.row:z.r,0,99,-1),cc=ganzzahl(z.col!==undefined?z.col:z.c,0,99,-1);
+        var sid=z.student!==undefined?z.student:(z.sid!==undefined?z.sid:z.id);
+        if(rr>=0&&cc>=0&&sid!==undefined&&sid!==null)altArr[rr+"_"+cc]=alsId(sid);
+      }
+    });
+  }else if(roh&&typeof roh==="object")Object.keys(roh).forEach(function(k){var x=rcLesen(k);if(x)altArr[x.r+"_"+x.c]=alsId(roh[k]);});
+  /* Größe: gespeichert oder aus den benutzten Plätzen */
+  var maxR=-1,maxC=-1;
+  Object.keys(altSitz).concat(Object.keys(altArr)).forEach(function(k){var x=rcLesen(k);if(x.r>maxR)maxR=x.r;if(x.c>maxC)maxC=x.c;});
+  var q=rasterMasse(p)||{};
+  var rows=Math.max(ganzzahl(q.rows,1,14,Math.max(4,maxR+1)),Math.min(14,maxR+1));
+  var cols=Math.max(ganzzahl(q.cols,1,14,Math.max(6,maxC+1)),Math.min(14,maxC+1));
   var gap=(2+rows*2<=20)?2:1, start=(gap===2)?2:1;
   var rc=Math.max(4,cols), rr=Math.min(20,start+rows*gap);
   var off=Math.floor((rc-cols)/2);
   var tables=[],seatMeta={},arrangement={};
-  var altSitz=(p.seats&&typeof p.seats==="object")?p.seats:{};
-  var altArr=(p.arrangement&&typeof p.arrangement==="object")?p.arrangement:{};
   for(var r=0;r<rows;r++)for(var c=0;c<cols;c++){
     var id="t_v1_"+r+"_"+c, alt=r+"_"+c, m=altSitz[alt];
     tables.push({id:id,x:off+c,y:start+r*gap,seats:1,dir:"h"});
@@ -1122,7 +1202,7 @@ function legacyMoebel(p){
 }
 /* Tische und Möbel prüfen: Größe, Lage im Raum, keine Überlappung */
 function raumObjekte(cols,rows,tables,furn,zaehle,neueId,tabMap){
-  var belegt=Object.create(null),outT=[],outF=[],gedreht=[];
+  var belegt=Object.create(null),outT=[],outF=[],gedreht=[],spaeter=[],umkehr=Object.create(null),eingerastet=0;
   function keineGedrehten(poly){return gedreht.every(function(g){return !polyUeberlappen(g,poly);});}
   function keineZellen(poly){
     return !Object.keys(belegt).some(function(k){
@@ -1141,6 +1221,14 @@ function raumObjekte(cols,rows,tables,furn,zaehle,neueId,tabMap){
     if(!seats||outT.length>=200){zaehle("tisch");return;}
     var o={x:ganzzahl(t.x,0,99,0),y:ganzzahl(t.y,0,99,0),seats:seats,dir:t.dir==="v"?"v":"h"};
     var wk=winkelNorm(t.winkel);
+    if(wk===90){
+      /* rechtwinklig gedreht: erst nach allen anderen Tischen und Möbeln ins Raster setzen */
+      var tidA=alsId(t.id);
+      o.id=neueId(tidA,"t");
+      if(tabMap&&typeof tidA==="string"&&!(tidA in tabMap))tabMap[tidA]=o.id;
+      spaeter.push({o:o,platz:outT.length});outT.push(null);
+      return;
+    }
     if(wk){
       o.winkel=wk;
       var poly=tischForm(o,o.x,o.y,EINZUG);
@@ -1151,8 +1239,9 @@ function raumObjekte(cols,rows,tables,furn,zaehle,neueId,tabMap){
       if(!frei(cells)||!keineGedrehten(tischForm(o,o.x,o.y,EINZUG))){zaehle("tisch");return;}
       markiere(cells);
     }
-    o.id=neueId(t.id,"t");
-    if(tabMap&&typeof t.id==="string"&&!(t.id in tabMap))tabMap[t.id]=o.id;
+    var tidAlt=alsId(t.id);
+    o.id=neueId(tidAlt,"t");
+    if(tabMap&&typeof tidAlt==="string"&&!(tidAlt in tabMap))tabMap[tidAlt]=o.id;
     var aus={id:o.id,x:o.x,y:o.y,seats:o.seats,dir:o.dir};
     if(wk)aus.winkel=wk;
     outT.push(aus);
@@ -1164,10 +1253,49 @@ function raumObjekte(cols,rows,tables,furn,zaehle,neueId,tabMap){
     var cells=boxCells("furniture",o,o.x,o.y);
     if(!frei(cells)||!keineGedrehten(rechteckForm(o.x,o.y,o.w,1,EINZUG))||outF.length>=20){zaehle("moebel");return;}
     markiere(cells);
-    outF.push({id:neueId(f.id,"f"),type:typ,x:o.x,y:o.y,w:o.w,
+    outF.push({id:neueId(alsId(f.id),"f"),type:typ,x:o.x,y:o.y,w:o.w,
       label:kurztext(f.label,60)||(typ==="board"?"Tafel":"Lehrertisch")});
   });
-  return{tables:outT,furniture:outF};
+  spaeter.forEach(function(d){
+    var o=d.o,L=viertelLagen(o),probe={seats:o.seats,dir:L.dir},ziel=null,zellen=null;
+    for(var i=0;i<L.lagen.length&&!ziel;i++){
+      var l=L.lagen[i],c=boxCells("table",probe,l.x,l.y);
+      if(frei(c)&&keineGedrehten(tischForm(probe,l.x,l.y,EINZUG))){ziel=l;zellen=c;}
+    }
+    if(ziel){
+      markiere(zellen);
+      outT[d.platz]={id:o.id,x:ziel.x,y:ziel.y,seats:o.seats,dir:L.dir};
+      if(L.dir==="h"&&o.seats>1)umkehr[o.id]=o.seats;     /* längs → quer im Uhrzeigersinn */
+      eingerastet++;
+      return;
+    }
+    /* passt nicht ins Raster: wie bisher schräg (90°) übernehmen */
+    o.winkel=90;
+    var poly=tischForm(o,o.x,o.y,EINZUG);
+    if(!imRaum(tischForm(o,o.x,o.y,0.02),cols,rows)||!keineGedrehten(poly)||!keineZellen(poly)){zaehle("tisch");return;}
+    gedreht.push(poly);
+    outT[d.platz]={id:o.id,x:o.x,y:o.y,seats:o.seats,dir:o.dir,winkel:90};
+  });
+  return{tables:outT.filter(Boolean),furniture:outF,umkehr:umkehr,eingerastet:eingerastet};
+}
+/* Geschlecht und Leistung auch in Worten („weiblich“, „f“, „stark“, „L1“ …) */
+var GESCHLECHT_WORT={w:"w",f:"w",weiblich:"w",female:"w",frau:"w","mädchen":"w",maedchen:"w",girl:"w",
+  m:"m","männlich":"m",maennlich:"m",male:"m",mann:"m",junge:"m",boy:"m",d:"d",divers:"d",diverse:"d",x:"x","":"x","–":"x","-":"x"};
+function geschlechtLesen(v){
+  if(typeof v!=="string")return null;
+  var k=v.trim().toLowerCase();
+  return hasOwn(GESCHLECHT_WORT,k)?GESCHLECHT_WORT[k]:null;
+}
+function stufeLesen(v){
+  if(typeof v==="number"&&isFinite(v))return ganzzahl(v,1,3,2);
+  if(typeof v!=="string")return null;
+  var k=v.trim().toLowerCase(),m=/^l?\s*([123])$/.exec(k);
+  if(m)return +m[1];
+  if(/^-?\d+(\.\d+)?$/.test(k))return ganzzahl(k,1,3,2);
+  if(/stark|hoch|gut|high/.test(k))return 3;
+  if(/mittel|medium|normal/.test(k))return 2;
+  if(/unterst|schwach|förder|foerder|niedrig|low/.test(k))return 1;
+  return null;
 }
 function normalisiere(p,H){
   var z=Object.create(null),reihenfolge=[];
@@ -1193,8 +1321,8 @@ function normalisiere(p,H){
     var name=kurztext(t.name,40);
     if(!name){zaehle("tag");return;}
     if(out.tags.length>=100){zaehle("limit");return;}
-    var id=neueId(t.id,"tag");
-    if(typeof t.id==="string"&&!(t.id in tagMap))tagMap[t.id]=id;
+    var tid=alsId(t.id),id=neueId(tid,"tag");
+    if(typeof tid==="string"&&!(tid in tagMap))tagMap[tid]=id;
     var farbe=(typeof t.color==="string"&&FARBE_RE.test(t.color))?t.color:STANDARD_FARBEN[out.tags.length%STANDARD_FARBEN.length];
     if(farbe!==t.color)zaehle("farbe");
     out.tags.push({id:id,name:name,color:farbe});
@@ -1202,6 +1330,7 @@ function normalisiere(p,H){
   function tagsFiltern(liste){
     var res=[];
     (Array.isArray(liste)?liste:[]).forEach(function(t){
+      t=alsId(t);
       var n=(typeof t==="string")?tagMap[t]:null;
       if(!n){zaehle("verweis");return;}
       if(res.indexOf(n)===-1)res.push(n);
@@ -1221,12 +1350,14 @@ function normalisiere(p,H){
       var tl=nameTeilen(name);vn=tl.vor;nn=tl.nach;name=(vn+" "+nn).trim();
     }
     if(out.students.length>=300){zaehle("limit");return;}
-    var id=neueId(s.id,"s");
-    if(typeof s.id==="string"&&!(s.id in stuMap))stuMap[s.id]=id;
-    var g=hasOwn(GENDERS,s.gender)?s.gender:"x";
-    if(s.gender!==undefined&&g!==s.gender)zaehle("wert");
-    var lv=ganzzahl(s.level,1,3,2);
-    if(s.level!==undefined&&Number(s.level)!==lv)zaehle("wert");
+    var sid=alsId(s.id),id=neueId(sid,"s");
+    if(typeof sid==="string"&&!(sid in stuMap))stuMap[sid]=id;
+    var g=geschlechtLesen(s.gender);
+    if(s.gender!==undefined&&s.gender!==null&&s.gender!==""&&g===null)zaehle("wert");
+    if(g===null)g="x";
+    var lv=stufeLesen(s.level);
+    if(s.level!==undefined&&s.level!==null&&s.level!==""&&(lv===null||(/^\s*-?\d+(\.\d+)?\s*$/.test(String(s.level))&&Number(s.level)!==lv)))zaehle("wert");
+    if(lv===null)lv=2;
     out.students.push({id:id,vorname:vn,nachname:nn,name:name,gender:g,level:lv,requiredTags:tagsFiltern(s.requiredTags),
       note:kurztext(s.note,300),solo:s.solo===true,lehrer:lehrerStufe(s.lehrer)});
   });
@@ -1236,6 +1367,7 @@ function normalisiere(p,H){
   var furnRoh=Array.isArray(room.furniture)?room.furniture:legacyMoebel(p);
   var ro=raumObjekte(cols,rows,p.tables,furnRoh,zaehle,neueId,tabMap);
   out.tables=ro.tables;out.room.furniture=ro.furniture;
+  if(ro.eingerastet)zaehle("einrasten",ro.eingerastet);
   var gueltig=Object.create(null);
   out.tables.forEach(function(t){for(var i=0;i<t.seats;i++)gueltig[t.id+"#"+i]=1;});
   function platzKey(k){
@@ -1243,7 +1375,9 @@ function normalisiere(p,H){
     var pos=k.lastIndexOf("#");if(pos<1)return null;
     var tid=tabMap[k.slice(0,pos)],idx=k.slice(pos+1);
     if(!tid||!/^\d{1,2}$/.test(idx))return null;
-    var neuK=tid+"#"+Number(idx);
+    var nr=Number(idx);
+    if(ro.umkehr[tid]&&nr<ro.umkehr[tid])nr=ro.umkehr[tid]-1-nr;
+    var neuK=tid+"#"+nr;
     return gueltig[neuK]?neuK:null;
   }
   out.seatMeta={};
@@ -1257,7 +1391,7 @@ function normalisiere(p,H){
   var gesetzt=Object.create(null);
   var ar=(p.arrangement&&typeof p.arrangement==="object"&&!Array.isArray(p.arrangement))?p.arrangement:{};
   Object.keys(ar).forEach(function(k){
-    var neuK=platzKey(k),sid=(typeof ar[k]==="string")?stuMap[ar[k]]:null;
+    var wer=alsId(ar[k]),neuK=platzKey(k),sid=(typeof wer==="string")?stuMap[wer]:null;
     if(!neuK||!sid||gesetzt[sid]||hasOwn(out.arrangement,neuK)||
        (out.seatMeta[neuK]&&out.seatMeta[neuK].blocked)){zaehle("verweis");return;}
     out.arrangement[neuK]=sid;gesetzt[sid]=1;
@@ -1272,6 +1406,7 @@ function normalisiere(p,H){
       if(res.length>=100){zaehle("limit");return;}
       var mem=[];
       roh.forEach(function(m){
+        m=alsId(m);
         var n=(typeof m==="string")?stuMap[m]:null;
         if(!n){zaehle("verweis");return;}
         if(mem.indexOf(n)===-1)mem.push(n);
@@ -1334,7 +1469,8 @@ function normalisiere(p,H){
     wert:["Ein ungültiger Wert (Geschlecht oder Leistungsstärke) wurde auf den Standard gesetzt.","# ungültige Werte (Geschlecht oder Leistungsstärke) wurden auf den Standard gesetzt."],
     vorlage:["Eine gespeicherte Raumvorlage war beschädigt und wurde bereinigt.","# gespeicherte Raumvorlagen waren beschädigt und wurden bereinigt."],
     passwort:["Das gespeicherte Passwort war ungültig; der Passwortschutz wurde entfernt."],
-    limit:["Die Datei enthielt mehr Einträge als erlaubt; überzählige wurden weggelassen."]
+    limit:["Die Datei enthielt mehr Einträge als erlaubt; überzählige wurden weggelassen."],
+    einrasten:["Ein um 90° gedrehter Tisch wurde genau ins Raster gesetzt (jetzt quer bzw. längs).","# um 90° gedrehte Tische wurden genau ins Raster gesetzt (jetzt quer bzw. längs)."]
   };
   reihenfolge.forEach(function(k){
     var n=z[k],t=T[k];
@@ -1564,6 +1700,37 @@ function winkelNorm(w){
   n=Math.round(n/5)*5;
   n=((n%180)+180)%180;if(n>90)n-=180;
   return n===0?0:n;                            /* Bereich −85° … 90° */
+}
+/* Vierteldrehung (90°/270°): Der Tisch wechselt zwischen quer und längs und liegt wieder genau im Raster.
+   Gedreht wird um die Tischmitte. Bei gerader Platzzahl läge das Ergebnis auf halben Feldern; gerundet wird
+   so, dass Hin- und Zurückdrehen (und viermal 90°) wieder genau auf dem Ausgangsfeld endet.
+   Liefert die neue Richtung und die möglichen Lagen, die beste zuerst. */
+function viertelLagen(t){
+  var m=tischMasse(t),cx=t.x+m.w/2,cy=t.y+m.h/2,dir=t.dir==="h"?"v":"h";
+  var nw=dir==="h"?t.seats:1,nh=dir==="h"?1:t.seats;
+  var ex=cx-nw/2,ey=cy-nh/2;
+  function wahl(v,hoch){var a=Math.floor(v+1e-9),b=Math.ceil(v-1e-9);return a===b?[a]:(hoch?[b,a]:[a,b]);}
+  var xs=wahl(ex,dir==="v"),ys=wahl(ey,dir!=="v"),lagen=[];
+  xs.forEach(function(x){ys.forEach(function(y){lagen.push({x:x,y:y});});});
+  return{dir:dir,lagen:lagen};
+}
+/* Bei einer Drehung wandern die Plätze mit: Nummern, Merkmale und Sitzende tauschen die Enden,
+   wenn der Tisch dabei „auf den Kopf“ kommt (quer→längs gegen, längs→quer mit dem Uhrzeigersinn, 180°). */
+function plaetzeUmkehren(tid,n){
+  function spiegeln(obj){
+    if(!obj)return;
+    var neu={},i;
+    for(i=0;i<n;i++){var a=tid+"#"+i;if(hasOwn(obj,a))neu[tid+"#"+(n-1-i)]=obj[a];}
+    for(i=0;i<n;i++)delete obj[tid+"#"+i];
+    Object.keys(neu).forEach(function(k){obj[k]=neu[k];});
+  }
+  spiegeln(state.seatMeta);spiegeln(state.arrangement);
+  if(multiSel)spiegeln(multiSel);
+  if(seatMenu&&seatMenu.tid===tid&&typeof seatMenu.idx==="number")seatMenu.idx=n-1-seatMenu.idx;
+  if(selected&&selected.kind==="seat"&&typeof selected.key==="string"){
+    var pos=selected.key.lastIndexOf("#");
+    if(selected.key.slice(0,pos)===tid)selected.key=tid+"#"+(n-1-Number(selected.key.slice(pos+1)));
+  }
 }
 function drehFaktor(w){var a=(w||0)*Math.PI/180;return Math.abs(Math.cos(a))+Math.abs(Math.sin(a));}
 function tischMasse(t){return t.dir==="v"?{w:1,h:t.seats}:{w:t.seats,h:1};}
@@ -3418,24 +3585,56 @@ function drawEditor(){
 }
 /* Drehen in 5°-Schritten; schnelle Folgeschritte bilden einen gemeinsamen Rückgängig-Schritt */
 var radAkku=0,letzteDrehung=null,drehHinweisZeit=0;
-function tischDrehen(t,wert,absolut,ohneFokus){
-  var alt=t.winkel||0,neu=winkelNorm(absolut?wert:alt+wert);
-  if(neu===alt)return true;
-  if(neu)t.winkel=neu;else delete t.winkel;
-  var ok=fits(t,t.x,t.y)&&!overlaps(t,t.x,t.y);
-  if(alt)t.winkel=alt;else delete t.winkel;
-  if(!ok){
-    if(Date.now()-drehHinweisZeit>2500){
-      drehHinweisZeit=Date.now();
-      toast("Zum Drehen fehlt hier der Platz – erst etwas Abstand zu Wand und Nachbartischen schaffen.","w");
-    }
-    ansage("Zum Drehen ist kein Platz frei.");
-    return false;
-  }
+function drehSchritt(t,ohneFokus){
   var jetzt=Date.now();
   if(letzteDrehung&&letzteDrehung.id===t.id&&jetzt-letzteDrehung.zeit<900){Store.label="Tisch gedreht";pruefeBald();}
   else schritt("Tisch gedreht");
   letzteDrehung={id:t.id,zeit:jetzt};
+}
+function keinPlatzZumDrehen(){
+  if(Date.now()-drehHinweisZeit>2500){
+    drehHinweisZeit=Date.now();
+    toast("Zum Drehen fehlt hier der Platz – erst etwas Abstand zu Wand und Nachbartischen schaffen.","w");
+  }
+  ansage("Zum Drehen ist kein Platz frei.");
+  return false;
+}
+/* 90°, 180° und 270°: Der Tisch steht danach gerade (quer oder längs) und genau im Raster. */
+function tischRechtwinklig(t,viertel,ohneFokus){
+  var altDir=t.dir,altX=t.x,altY=t.y,altW=t.winkel,ziel=null,neuDir=t.dir;
+  function zurueck(){t.dir=altDir;t.x=altX;t.y=altY;if(altW)t.winkel=altW;else delete t.winkel;}
+  delete t.winkel;
+  if(viertel===2){if(fits(t,t.x,t.y)&&!overlaps(t,t.x,t.y))ziel={x:t.x,y:t.y};}
+  else{
+    var L=viertelLagen(t);neuDir=L.dir;t.dir=L.dir;
+    for(var i=0;i<L.lagen.length&&!ziel;i++){var l=L.lagen[i];if(fits(t,l.x,l.y)&&!overlaps(t,l.x,l.y))ziel=l;}
+  }
+  zurueck();
+  if(!ziel)return keinPlatzZumDrehen();
+  drehSchritt(t,ohneFokus);
+  t.dir=neuDir;t.x=ziel.x;t.y=ziel.y;delete t.winkel;
+  /* quer→längs im Uhrzeigersinn (viertel=1) behält die Reihenfolge, gegen den Uhrzeigersinn (3) kehrt sie um;
+     längs→quer genau umgekehrt; 180° kehrt immer um */
+  var umkehren=viertel===2?true:(altDir==="h"?viertel===3:viertel===1);
+  if(umkehren&&t.seats>1)plaetzeUmkehren(t.id,t.seats);
+  edSel=t.id;if(!ohneFokus)edFokus={art:"table",id:t.id};
+  drawEditor();
+  ansage("Tisch steht jetzt "+(t.dir==="h"?"quer":"längs")+" und rastet im Raster ein.");
+  return true;
+}
+function tischDrehen(t,wert,absolut,ohneFokus){
+  var alt=t.winkel||0,roh=Math.round(Number(absolut?wert:alt+wert)/5)*5;
+  if(!isFinite(roh))return false;
+  var r=((roh%360)+360)%360;
+  if(r===90||r===270)return tischRechtwinklig(t,r===90?1:3,ohneFokus);
+  if(r===180&&absolut)return tischRechtwinklig(t,2,ohneFokus);
+  var neu=winkelNorm(roh);
+  if(neu===alt)return true;
+  if(neu)t.winkel=neu;else delete t.winkel;
+  var ok=fits(t,t.x,t.y)&&!overlaps(t,t.x,t.y);
+  if(alt)t.winkel=alt;else delete t.winkel;
+  if(!ok)return keinPlatzZumDrehen();
+  drehSchritt(t,ohneFokus);
   if(neu)t.winkel=neu;else delete t.winkel;
   edSel=t.id;if(!ohneFokus)edFokus={art:"table",id:t.id};
   drawEditor();
@@ -3716,11 +3915,11 @@ function drawTablePanel(){
     '<button type="button" class="btn danger" id="tDel">'+ic("trash")+"Löschen</button></div>";
   h+='<div class="insp-sec" style="margin-top:16px"><div class="insp-h">Drehung</div>'+
     '<div class="rowf drehreihe"><button type="button" class="btn icon" id="tWm" aria-label="5 Grad gegen den Uhrzeigersinn drehen" title="−5° (Q)">'+ic("rotL")+"</button>"+
-    '<input type="number" id="tW" min="-85" max="90" step="5" value="'+(t.winkel||0)+'" aria-label="Drehwinkel in Grad" style="width:84px">'+
+    '<input type="number" id="tW" min="-180" max="360" step="5" value="'+(t.winkel||0)+'" aria-label="Drehwinkel in Grad" style="width:84px">'+
     '<span class="muted" aria-hidden="true">°</span>'+
     '<button type="button" class="btn icon" id="tWp" aria-label="5 Grad im Uhrzeigersinn drehen" title="+5° (E)">'+ic("rotate")+"</button>"+
     '<button type="button" class="btn sm ghost" id="tW0"'+(t.winkel?"":" disabled")+">gerade stellen</button></div>"+
-    '<p class="hint" style="margin:8px 0 0">In 5°-Schritten – auch mit Umschalt + Mausrad über dem Tisch oder mit den Tasten Q und E.</p></div>';
+    '<p class="hint" style="margin:8px 0 0">In 5°-Schritten – auch mit Umschalt + Mausrad über dem Tisch oder mit den Tasten Q und E. Bei 90°, 180° und 270° rastet der Tisch wieder genau im Raster ein.</p></div>';
   h+='<div class="insp-sec" style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border)"><div class="insp-h">Plätze</div><div class="seatlist">';
   for(var i=0;i<t.seats;i++){
     var m=meta(seatKey(t.id,i));
@@ -4783,6 +4982,7 @@ function renderHelpTab(){
   <li><span class="kbd">Umschalt</span> + <strong>Mausrad</strong> über einem Tisch dreht ihn (<span class="kbd">Alt</span> + Mausrad geht auch).</li>
   <li><span class="kbd">Q</span> und <span class="kbd">E</span> drehen den ausgewählten Tisch um 5° gegen bzw. im Uhrzeigersinn, <span class="kbd">R</span> um 90°.</li>
   <li>Rechts unter „Drehung“: ${k("rotL")} ${k("rotate")} oder den Winkel direkt eintippen; „gerade stellen“ setzt ihn auf 0°.</li>
+  <li>Bei <strong>90°, 180° und 270°</strong> rastet der Tisch wieder genau im Raster ein: Er steht dann längs bzw. quer, verbindet sich mit angrenzenden Tischen, und die Plätze wandern mit – bei 180° sitzt, wer vorher links saß, rechts.</li>
 </ul>
 <p>Ist zum Drehen zu wenig Platz, bleibt der Tisch stehen und das Programm sagt Bescheid. Schnell hintereinander gedreht zählt als ein Schritt für ${k("undo")}. Im Sitzplan und im Ausdruck dreht sich der Tisch mit – der <strong>Text steht aber immer waagrecht</strong> im Platz. Nachbarschaften (für Regeln und „allein sitzen“) werden bei gedrehten Tischen nach dem tatsächlichen Abstand der Plätze bestimmt.</p>
 <h4>Plätze: Merkmale und Sperren</h4>
@@ -4934,7 +5134,8 @@ function renderHelpTab(){
 <h4>Sicherung</h4>
 <ul>
   <li>Menü ${k("more")} → <strong>Sicherung herunterladen</strong> speichert den ganzen Plan als Datei (mit Planname und Datum im Dateinamen) – auf Wunsch <strong>mit Passwort verschlüsselt</strong>.</li>
-  <li><strong>Sicherung öffnen</strong> holt sie zurück, bei verschlüsselten mit Passwortabfrage. Die Datei wird geprüft; ältere Fassungen werden umgewandelt, und du siehst, was angepasst wurde.</li>
+  <li><strong>Sicherung öffnen</strong> holt sie zurück, bei verschlüsselten mit Passwortabfrage. Die Datei wird geprüft; Sicherungen <strong>aus allen früheren Fassungen</strong> werden umgewandelt, und du siehst, was angepasst wurde. Lässt sich bei einer sehr alten Datei der Raum nicht lesen, werden wenigstens Klassenliste und Regeln übernommen.</li>
+  <li>Eine Sicherung aus <em>dieser</em> Fassung lässt sich in einer älteren Fassung des Programms (etwa einer früher gespeicherten Kopie) nicht öffnen – dafür immer die neueste Datei verwenden.</li>
   <li>Für <strong>mehrere Klassen</strong> gibst du jeweils einen Plannamen ein und lädst pro Klasse eine Sicherung herunter. Der Browser merkt sich nur den zuletzt geöffneten Plan.</li>
 </ul>
 <div class="note">Der Browserspeicher gehört zu diesem Gerät. Lege von einem fertigen Plan eine Sicherung an – mit Hinweisen oder Leistungsstärken am besten verschlüsselt.</div>
@@ -5609,14 +5810,38 @@ function exportJson(){
     };
   });
 }
+/* Text einer Sicherung: UTF-8 (mit oder ohne BOM), UTF-16 (etwa nach „Speichern unter“ im Editor) oder Windows-1252 */
+function sicherungsText(buf){
+  var b=new Uint8Array(buf);
+  try{
+    if(b.length>=2&&b[0]===0xFF&&b[1]===0xFE)return new TextDecoder("utf-16le").decode(b.subarray(2));
+    if(b.length>=2&&b[0]===0xFE&&b[1]===0xFF)return new TextDecoder("utf-16be").decode(b.subarray(2));
+    if(b.length>=4&&b[0]!==0&&b[1]===0&&b[3]===0)return new TextDecoder("utf-16le").decode(b);
+    if(b.length>=4&&b[0]===0&&b[1]!==0&&b[2]===0)return new TextDecoder("utf-16be").decode(b);
+  }catch(e){}
+  return textDekodieren(b);
+}
+/* JSON lesen – notfalls nur den Teil zwischen erster „{“ und letzter „}“ (z. B. Text davor oder danach) */
+function jsonLesen(text){
+  text=String(text).replace(/^\ufeff/,"").trim();
+  try{return JSON.parse(text);}catch(e){}
+  var a=text.indexOf("{"),z=text.lastIndexOf("}");
+  if(a!==-1&&z>a){try{return JSON.parse(text.slice(a,z+1));}catch(e2){}}
+  return undefined;
+}
 /* „Sicherung öffnen“: prüfen, ggf. entschlüsseln, migrieren, übernehmen */
 function importJson(file){
   if(file.size>10*1024*1024){toast("Die Datei ist zu groß für eine Sitzplan-Sicherung.","d");return;}
   var fr=new FileReader();
   fr.onload=function(e){
-    var roh;
-    try{roh=JSON.parse(String(e.target.result).replace(/^﻿/,""));}
-    catch(err){toast("Die Datei ist keine lesbare Sitzplan-Sicherung.","d");return;}
+    var roh=jsonLesen(sicherungsText(e.target.result));
+    if(roh===undefined){
+      toast(/\.(csv|tsv|xlsx?|ods)$/i.test(file.name||"")?
+        "Das ist eine Tabelle, keine Sicherung. Klassenlisten bitte unter „Klasse“ → „Aus Datei“ laden.":
+        "Die Datei „"+(file.name||"")+"“ ist keine lesbare Sitzplan-Sicherung (kein JSON-Inhalt).","d");
+      return;
+    }
+    if(roh&&typeof roh==="object"&&!Array.isArray(roh)&&!roh.verschluesselt){var inn=auspacken(roh);if(inn&&inn.verschluesselt===true)roh=inn;}
     if(roh&&roh.verschluesselt===true){
       if(!kryptoMoeglich()){toast("Verschlüsselte Sicherungen lassen sich nur über eine sichere Verbindung öffnen.","d");return;}
       if(!roh.kdf||typeof roh.kdf.salt!=="string"||typeof roh.iv!=="string"||typeof roh.daten!=="string"){
@@ -5646,12 +5871,17 @@ function importJson(file){
     sicherungUebernehmen(roh);
   };
   fr.onerror=function(){toast("Die Datei konnte nicht gelesen werden.","d");};
-  fr.readAsText(file,"UTF-8");
+  fr.readAsArrayBuffer(file);
 }
 function sicherungUebernehmen(roh){
   var r;
   try{r=pruefeUndMigriere(roh);}
-  catch(err){toast("Öffnen nicht möglich: "+(err.datenFehler?err.message:"Die Datei ist keine gültige Sitzplan-Sicherung."),"d");return;}
+  catch(err){
+    if(!err||!err.datenFehler){try{console.error("Sicherung öffnen:",err);}catch(e2){}}
+    toast("Öffnen nicht möglich: "+(err&&err.datenFehler?err.message:
+      "Die Datei ließ sich nicht einlesen (technischer Grund: "+((err&&err.message)||"unbekannt")+")."),"d");
+    return;
+  }
   sofortSichern();
   schritt("Sicherung geöffnet",{ersetzt:true});
   state=r.state;unlocked=false;selected=null;edSel=null;
