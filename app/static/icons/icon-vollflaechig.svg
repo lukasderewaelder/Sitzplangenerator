@@ -1,11 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Sitzplan-Generator">
   <rect width="512" height="512" fill="#2f5d3a"/>
-  <rect x="150" y="128" width="212" height="26" rx="8" fill="#ffffff"/>
+  <rect x="88" y="56" width="336" height="20" rx="10" fill="#ffffff"/>
   <g fill="#e6efe8">
-    <rect x="146" y="214" width="64" height="52" rx="10"/><rect x="224" y="214" width="64" height="52" rx="10"/><rect x="302" y="214" width="64" height="52" rx="10"/>
-    <rect x="146" y="304" width="64" height="52" rx="10"/><rect x="224" y="304" width="64" height="52" rx="10"/><rect x="302" y="304" width="64" height="52" rx="10"/>
+    <rect x="88" y="108" width="100" height="100" rx="24"/><rect x="206" y="108" width="100" height="100" rx="24"/><rect x="324" y="108" width="100" height="100" rx="24"/>
+    <rect x="88" y="226" width="100" height="100" rx="24"/><rect x="324" y="226" width="100" height="100" rx="24"/>
+    <rect x="88" y="344" width="100" height="100" rx="24"/><rect x="206" y="344" width="100" height="100" rx="24"/><rect x="324" y="344" width="100" height="100" rx="24"/>
   </g>
-  <g stroke="#2f5d3a" stroke-width="5" stroke-linecap="round">
-    <path d="M178 224v32M256 224v32M334 224v32M178 314v32M256 314v32M334 314v32"/>
+  <g transform="rotate(-8 256 276)">
+    <rect x="203" y="223" width="106" height="106" rx="26" fill="#f2b134"/>
+    <g fill="#2f5d3a">
+      <circle cx="231" cy="251" r="9"/><circle cx="281" cy="251" r="9"/>
+      <circle cx="256" cy="276" r="9"/>
+      <circle cx="231" cy="301" r="9"/><circle cx="281" cy="301" r="9"/>
+    </g>
   </g>
 </svg>

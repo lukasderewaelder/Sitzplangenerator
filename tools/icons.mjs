@@ -6,10 +6,11 @@ import { readFile, writeFile } from "node:fs/promises";
 const ordner = "app/static/icons/";
 const rund = await readFile(ordner + "icon.svg", "utf8");
 const voll = await readFile(ordner + "icon-vollflaechig.svg", "utf8");
+const maskable = await readFile(ordner + "icon-maskable.svg", "utf8");
 const ZIELE = [
   ["icon-192.png", rund, 192, true],
   ["icon-512.png", rund, 512, true],
-  ["icon-maskable-512.png", voll, 512, false],
+  ["icon-maskable-512.png", maskable, 512, false],
   ["apple-touch-icon.png", voll, 180, false],
 ];
 
