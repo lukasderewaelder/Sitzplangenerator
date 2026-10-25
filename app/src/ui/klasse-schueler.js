@@ -9,7 +9,7 @@ import { S } from "../store.js";
 import { buildOpts } from "./klasse-einstellungen.js";
 import { buildTags } from "./klasse-merkmale.js";
 import { buildRules } from "./klasse-regeln.js";
-import { ansage, toast } from "./meldungen.js";
+import { ansage, confirmBox, toast } from "./meldungen.js";
 import { ic } from "./symbole.js";
 
 /* ===================== Klasse ===================== */
@@ -55,7 +55,6 @@ export function renderClassTab(){
 export function klassenZaehler(){
   document.querySelectorAll("[data-krz]").forEach(function(s){s.textContent=klassenZahl(s.dataset.krz);});
 }
-function refreshRules(){klassenZaehler();}
 
 /* ---- Schüler:innen ---- */
 S.stuOffen={};
@@ -271,7 +270,7 @@ function drawStuBulk(){
     if(neu&&!hatLehrertisch())toast("Im Raum steht noch kein Lehrertisch – die Regel ruht, bis einer aufgestellt ist.","w");
   };
   el("bkDel").onclick=function(){
-    S.confirmBox(ids.length+(ids.length===1?" Person":" Personen")+" entfernen? Auch ihre Regeln und Plätze werden entfernt.",function(){
+    confirmBox(ids.length+(ids.length===1?" Person":" Personen")+" entfernen? Auch ihre Regeln und Plätze werden entfernt.",function(){
       schritt(ids.length+" Personen entfernt");stuLoeschen(ids);drawStuList();
     },null,{ja:"Entfernen",gefahr:true});
   };
@@ -393,7 +392,7 @@ function drawStuList(){
     top.querySelector(".g").onchange=function(){schritt("Geschlecht geändert");s.gender=this.value;};
     top.querySelector(".l").onchange=function(){schritt("Leistung geändert");s.level=parseInt(this.value,10);};
     top.querySelector(".ib").onclick=function(){
-      S.confirmBox("„"+s.name+"“ entfernen? Auch Regeln mit dieser Person werden entfernt.",function(){
+      confirmBox("„"+s.name+"“ entfernen? Auch Regeln mit dieser Person werden entfernt.",function(){
         schritt(s.name+" entfernt");stuLoeschen([s.id]);drawStuList();
       },null,{ja:"Entfernen",gefahr:true});
     };

@@ -1,3 +1,4 @@
+import { confirmBox } from "./meldungen.js";
 import { el, esc, uid } from "../core/basis.js";
 import { ABSTAND, NAEHE } from "../core/konstanten.js";
 import { sName, stufeVon } from "../core/regeln.js";
@@ -83,7 +84,7 @@ export function drawGroups(){
         };
       });
       d.querySelector(".ib").onclick=function(){
-        S.confirmBox("Gruppe "+(gi+1)+" löschen?",function(){schritt("Gruppe gelöscht");list.splice(gi,1);drawGroups();klassenZaehler();},null,{ja:"Löschen",gefahr:true});
+        confirmBox("Gruppe "+(gi+1)+" löschen?",function(){schritt("Gruppe gelöscht");list.splice(gi,1);drawGroups();klassenZaehler();},null,{ja:"Löschen",gefahr:true});
       };
       d.querySelector("[data-pick]").onclick=function(){
         if(gruppeOffen[g.id])delete gruppeOffen[g.id];else gruppeOffen[g.id]=1;

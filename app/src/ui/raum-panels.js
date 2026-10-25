@@ -84,7 +84,6 @@ export function closeSeatMenu(){
   S.seatMenu={tid:null,idx:null};
   if(war)drawTablePanel();
 }
-function drawSeatMenu(){drawTablePanel();}
 function panelKopf(kicker,titel,sub){
   return '<div class="insp-kicker">'+kicker+'</div><div class="insp-title">'+titel+"</div>"+(sub?'<div class="insp-sub">'+sub+"</div>":"");
 }

@@ -10,8 +10,8 @@ import { closeModal, openModal } from "../ui/modal.js";
 import { ic } from "../ui/symbole.js";
 
 /* ===================== Klassenliste aus CSV/Excel ===================== */
-function csvTeilen(text){
-  text=String(text).replace(/^﻿/,"").replace(/\r\n?/g,"\n");
+export function csvTeilen(text){
+  text=String(text).replace(/^\uFEFF/,"").replace(/\r\n?/g,"\n");
   var zeilen=text.split("\n"),erste="";
   for(var i=0;i<zeilen.length;i++)if(zeilen[i].trim()){erste=zeilen[i];break;}
   function zahl(z){return erste.split(z).length-1;}
@@ -91,7 +91,7 @@ function xlsxLesen(buf){
         alle(rw,"c").forEach(function(c){
           var ref=c.getAttribute("r")||"",m=/^([A-Z]+)/.exec(ref),sp=0;
           if(m){for(var q=0;q<m[1].length;q++)sp=sp*26+(m[1].charCodeAt(q)-64);sp--;}else sp=z.length;
-          var typ=c.getAttribute("t"),v=alle(c,"v")[0],wert="";
+          var typ=c.getAttribute("t"),v=alle(c,"v")[0],wert;
           if(typ==="s")wert=geteilt[parseInt(v?v.textContent:"-1",10)]||"";
           else if(typ==="inlineStr")wert=alle(c,"t").map(function(x){return x.textContent;}).join("");
           else wert=v?v.textContent:"";
@@ -124,7 +124,7 @@ export function listeAusDatei(f){
   fr.readAsArrayBuffer(f);
 }
 /* Kopfzeile erkennen und Einträge ableiten */
-function personenAusTabelle(rows){
+export function personenAusTabelle(rows){
   var res={eintraege:[],kopf:false,vorNach:false,spalten:{}};
   if(!rows.length)return res;
   var k=rows[0].map(function(x){return String(x).toLowerCase().replace(/[^a-zäöüß\/:]/g,"");}),sp={};

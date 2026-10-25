@@ -7,7 +7,7 @@ import { vorlageA, vorlageB, vorlageC } from "../core/vorlagen.js";
 import { reindex } from "../core/zustand.js";
 import { Store, pruefeBald, save, schritt } from "../io/speicher.js";
 import { S } from "../store.js";
-import { ansage, toast } from "./meldungen.js";
+import { ansage, confirmBox, toast } from "./meldungen.js";
 import { closeModal, openModal } from "./modal.js";
 import { boxCells, collides, fits, fitsBox, furniture, overlaps } from "./plan-ansicht.js";
 import { renderAll } from "./plan-status.js";
@@ -20,7 +20,6 @@ S.edSel=null;
 S.EDCELL=42;
 S.multiSel=null;                         /* null = aus, sonst Objekt mit ausgewählten Plätzen */
 export function multiAn(){return S.multiSel!==null;}
-function multiZahl(){return S.multiSel?Object.keys(S.multiSel).length:0;}
 export function renderRoomTab(){buildRoomEditor(el("roomPane"));}
 function buildRoomEditor(b){
   b.innerHTML=
@@ -141,7 +140,7 @@ export function rasterAendern(){
     drawEditor();toast("Raster: "+nc+" × "+nr+" Felder.");
   }
   if(dropped.length||mDrop.length){
-    S.confirmBox((dropped.length?dropped.length+(dropped.length===1?" Tisch liegt":" Tische liegen"):"")+
+    confirmBox((dropped.length?dropped.length+(dropped.length===1?" Tisch liegt":" Tische liegen"):"")+
       (dropped.length&&mDrop.length?" und ":"")+(mDrop.length?mDrop.length+" Möbelstück(e)":"")+
       " außerhalb des neuen Rasters und würden entfernt. Fortfahren?",los,function(){
         el("edCols").value=S.state.room.cols;el("edRows").value=S.state.room.rows;
@@ -222,7 +221,7 @@ function templateList(){
 }
 function applyTemplate(v){
   if(!v.data)return;
-  S.confirmBox('Raum durch „'+v.name+'“ ersetzen? Die aktuelle Tischanordnung geht verloren, die Klassenliste bleibt.',function(){
+  confirmBox('Raum durch „'+v.name+'“ ersetzen? Die aktuelle Tischanordnung geht verloren, die Klassenliste bleibt.',function(){
     var d=v.data;
     schritt("Vorlage angewendet");
     S.state.room.cols=d.cols;S.state.room.rows=d.rows;
@@ -454,7 +453,7 @@ export function moebelLoeschen(f,danach){
     if(danach)danach();
   }
   if(letzter&&n){
-    S.confirmBox("Ohne Lehrertisch entfällt die Regel „Nah am Lehrertisch“ für "+(n===1?"1 Person":n+" Personen")+
+    confirmBox("Ohne Lehrertisch entfällt die Regel „Nah am Lehrertisch“ für "+(n===1?"1 Person":n+" Personen")+
       ". Sie gilt wieder, sobald ein Lehrertisch im Raum steht. Lehrertisch trotzdem entfernen?",los,null,{ja:"Entfernen",gefahr:true});
     return;
   }

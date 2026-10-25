@@ -19,7 +19,7 @@ function aktionKnopf(text,aktion,arg,kl){
 }
 function behebenKnopf(i){return aktionKnopf("Beheben","beheben",problemSchluessel(i),"primary");}
 export function konfliktZeile(i){
-  var txt,kl="ri",akt="",icn="alert";
+  var txt,kl="ri",akt,icn="alert";
   if(i.type==="black"){
     icn="split";
     txt=esc(sName(i.a))+" und "+esc(sName(i.b))+" sitzen zu nah beieinander<small>Auseinander setzen · "+esc(stufenText("bl",i.stufe||"moderat"))+"</small>";

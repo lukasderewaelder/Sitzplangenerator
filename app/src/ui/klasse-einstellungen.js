@@ -3,7 +3,7 @@ import { NAMENSFORMATE, reindex } from "../core/zustand.js";
 import { save, schritt } from "../io/speicher.js";
 import { S } from "../store.js";
 import { renderClassTab } from "./klasse-schueler.js";
-import { toast } from "./meldungen.js";
+import { confirmBox, toast } from "./meldungen.js";
 import { sha } from "./passwort.js";
 import { renderSide } from "./plan-status.js";
 import { ic } from "./symbole.js";
@@ -77,7 +77,7 @@ export function buildOpts(b){
   };
   el("pwNew").addEventListener("keydown",function(e){if(e.key==="Enter")el("pwSet").click();});
   if(el("pwClear"))el("pwClear").onclick=function(){
-    S.confirmBox("Passwortschutz wirklich entfernen?",function(){
+    confirmBox("Passwortschutz wirklich entfernen?",function(){
       S.state.security.hash=null;save();renderClassTab();renderSide();
     },null,{ja:"Schutz entfernen",gefahr:true});
   };

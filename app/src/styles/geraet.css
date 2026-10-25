@@ -1,0 +1,6 @@
+  /* ===================== Installierte App und Touch-Geräte ===================== */
+  /* Kerbe, abgerundete Ecken und Home-Balken freihalten (außerhalb solcher Geräte sind alle Werte 0) */
+  .app{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  /* kein Gummiband-Effekt der ganzen Seite in der installierten App */
+  @media (display-mode:standalone){body{overscroll-behavior:none}}

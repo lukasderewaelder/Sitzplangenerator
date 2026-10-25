@@ -21,12 +21,12 @@ function erstenFokus(box,ohne){
     if(ziel)ziel.focus();
   },30);
 }
-function merkeRueckfokus(){
+export function merkeRueckfokus(){
   var a=document.activeElement;
   if(!a||a===document.body)return null;
   return{node:a,k:a.dataset?a.dataset.k:null,id:a.id||null};
 }
-function stelleFokusHer(r){
+export function stelleFokusHer(r){
   if(!r)return;
   var n=null;
   if(r.k)n=document.querySelector('#room .seat[data-k="'+r.k+'"]');
@@ -49,13 +49,6 @@ export function closeModal(){
 }
 el("modalX").onclick=closeModal;
 el("ov").addEventListener("click",function(e){if(e.target.id==="ov")closeModal();});
-var altConfirm=S.confirmBox;
-S.confirmBox=function(msg,fn,onNo,opt){
-  S.confirmRueck=merkeRueckfokus();
-  altConfirm(msg,function(){var r=S.confirmRueck;S.confirmRueck=null;if(fn)fn();if(el("ov").hidden)stelleFokusHer(r);},
-    function(){var r=S.confirmRueck;S.confirmRueck=null;if(onNo)onNo();stelleFokusHer(r);},opt);
-  setTimeout(function(){el("cYes").focus();},30);
-};
 function fokusFalle(e,box){
   var ziele=sichtbareFokusziele(box);if(!ziele.length)return;
   var erst=ziele[0],letzt=ziele[ziele.length-1];

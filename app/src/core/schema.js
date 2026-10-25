@@ -100,11 +100,6 @@ export function pruefeUndMigriere(roh){
   }
   return{state:normalisiere(p,H),hinweise:H,version:v};
 }
-function migrate(p){return pruefeUndMigriere(p).state;}      /* älterer Name */
-function normGroup(g){
-  if(Array.isArray(g))return{id:uid("g"),members:g.slice(),level:"moderat"};
-  return{id:(g&&g.id)||uid("g"),members:(g&&g.members)||[],level:hasOwn(STUFEN,g&&g.level)?g.level:"moderat"};
-}
 /* Version 1: Raster aus Einzelplätzen („Reihe_Spalte“) → jeder Platz wird ein Einzeltisch */
 function migriereV1(p,H){
   /* Platzschlüssel „Reihe_Spalte“ – auch „Reihe-Spalte“, „Reihe,Spalte“, „r2c3“ … */

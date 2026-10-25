@@ -10,27 +10,12 @@ import { toast } from "../ui/meldungen.js";
 import { closeModal, openModal } from "../ui/modal.js";
 import { ic } from "../ui/symbole.js";
 
-/* ===================== Download-Fähigkeit ===================== */
-S.dl=null;
-if(window.claude&&window.claude.use){
-  window.claude.use("downloads").then(function(c){S.dl=c;}).catch(function(){S.dl=null;});
-}
-
 /* ===================== Sicherung (intern weiterhin JSON) ===================== */
 function fileBase(){
   return (S.state.planName||"Sitzplan").replace(/[^a-zA-Z0-9äöüÄÖÜß _-]+/g,"").trim().replace(/\s+/g,"_")||"Sitzplan";
 }
 function heute(){var d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
 function dateiAnbieten(name,data,erfolg){
-  if(S.dl){
-    S.dl.save({filename:name,data:data}).then(function(r){
-      if(r&&r.status==="saved")toast(erfolg+": "+name);
-    }).catch(function(e){
-      if(e&&e.code==="declined")return;
-      toast("Sicherung fehlgeschlagen: "+((e&&e.message)||"unbekannter Fehler"),"d");
-    });
-    return;
-  }
   try{
     var blob=new Blob([data],{type:"application/json"});
     var url=URL.createObjectURL(blob);

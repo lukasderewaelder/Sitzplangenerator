@@ -10,6 +10,7 @@ import "./styles/dialoge.css";
 import "./styles/beamer.css";
 import "./styles/responsiv.css";
 import "./styles/ergaenzungen.css";
+import "./styles/geraet.css";
 import "./styles/druck.css";
 
 import "./core/basis.js";
@@ -50,6 +51,7 @@ import "./ui/thema.js";
 import "./ui/beamer.js";
 import "./ui/sperre.js";
 
+import { dauerhaftenSpeicherErbitten, ersteInstallationHinweisen, offlineEinrichten } from "./io/geraet.js";
 import { el, esc } from "./core/basis.js";
 import { BEAMER_KEY } from "./core/konstanten.js";
 import { kurztext } from "./core/schema.js";
@@ -61,7 +63,7 @@ import { Store, loadLocal, rueckgaengig, schritt, sofortSichern, speicherInit, s
 import { S } from "./store.js";
 import { beamerBeenden, beamerStarten } from "./ui/beamer.js";
 import { showTab } from "./ui/bereiche.js";
-import { toast, uhrzeit } from "./ui/meldungen.js";
+import { confirmBox, toast, uhrzeit } from "./ui/meldungen.js";
 import { closeModal, openModal } from "./ui/modal.js";
 import { renderRoom } from "./ui/plan-ansicht.js";
 import { renderAll, renderSide, statusOeffnen } from "./ui/plan-status.js";
@@ -72,7 +74,7 @@ import { pinchAnbinden, zoomAnzeige, zoomSetzen, zoomStufe } from "./ui/zoom.js"
 
 /* ===================== Neuer leerer Plan ===================== */
 function neuerPlan(){
-  S.confirmBox("Wirklich einen neuen, leeren Plan beginnen? Der bisherige Plan lässt sich danach mit „Rückgängig“ oder aus einer Sicherung zurückholen.",function(){
+  confirmBox("Wirklich einen neuen, leeren Plan beginnen? Der bisherige Plan lässt sich danach mit „Rückgängig“ oder aus einer Sicherung zurückholen.",function(){
     schritt("Neuer Plan",{ersetzt:true});
     S.state=defaultState();S.unlocked=false;S.edSel=null;S.selected=null;S.multiSel=null;S.seatMenu={tid:null,idx:null};
     el("planName").value=S.state.planName;
@@ -152,11 +154,14 @@ pinchAnbinden(el("stage"),"plan");
 /* ===================== Start ===================== */
 symboleEinsetzen();
 themaAnwenden();
-loadLocal();
+var hatPlan=loadLocal();
 el("planName").value=S.state.planName;
 zoomAnzeige();
 renderAll();
 speicherInit();
+offlineEinrichten();
+dauerhaftenSpeicherErbitten();
+ersteInstallationHinweisen(hatPlan||S.ladeFehler);
 if(S.ladeFehler)toast("Der zuletzt gespeicherte Stand war beschädigt und konnte nicht geladen werden. Er bleibt im Browser aufbewahrt; es beginnt ein leerer Plan.","d");
 (function(){
   var bw=null;try{bw=localStorage.getItem(BEAMER_KEY);}catch(e){}

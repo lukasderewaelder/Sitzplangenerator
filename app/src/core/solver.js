@@ -1,4 +1,4 @@
-import { shuffle } from "./basis.js";
+import { rnd, shuffle } from "./basis.js";
 import { buildAdj, cleanArrangement, usableSeats } from "./geometrie.js";
 import { blackVerletzt, inAnyGroup, lehrerDaten, stufeVon, whiteVerbunden } from "./regeln.js";
 import { schritt } from "../io/speicher.js";
@@ -29,11 +29,6 @@ function sitzgruppen(seats,adj){
   return comps;
 }
 /* Obergrenze für Einzelplätze, wenn die Gruppe leer bleibt: jeder zweite Platz */
-function soloKapazitaet(seats,adj){
-  var cap=0;
-  sitzgruppen(seats,adj).forEach(function(l){cap+=Math.ceil(l.length/2);});
-  return cap;
-}
 /* Für eine Sitzgruppe: wie viele sitzen höchstens allein, wenn p Personen darin sitzen? */
 function gruppenBest(list,adj){
   var n=list.length,best=[],i,p;
@@ -207,8 +202,8 @@ function verbessern(start,startPen,freeKeys,seats,adj,steps){
   var cur=JSON.parse(JSON.stringify(start)),curPen=startPen;
   if(freeKeys.length>1){
     for(var it=0;it<steps&&curPen>0;it++){
-      var k1=freeKeys[(Math.random()*freeKeys.length)|0];
-      var k2=freeKeys[(Math.random()*freeKeys.length)|0];
+      var k1=freeKeys[(rnd()*freeKeys.length)|0];
+      var k2=freeKeys[(rnd()*freeKeys.length)|0];
       if(k1===k2)continue;
       var a=cur[k1],b=cur[k2];
       if(a===undefined&&b===undefined)continue;
@@ -264,7 +259,7 @@ export function generate(){
       var scored=cand.map(function(k){return{k:k,s:localScore(stu,k,arr,adj)};});
       var min=Infinity;scored.forEach(function(o){if(o.s<min)min=o.s;});
       var top=scored.filter(function(o){return o.s===min;});
-      arr[top[(Math.random()*top.length)|0].k]=stu.id;
+      arr[top[(rnd()*top.length)|0].k]=stu.id;
     });
     var pen=evaluate(arr,seats,adj).pen;
     if(!bester||pen<bester.pen)bester={arr:arr,pen:pen};

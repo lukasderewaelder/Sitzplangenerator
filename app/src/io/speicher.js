@@ -11,7 +11,7 @@ import { closeSeatMenu } from "../ui/raum-panels.js";
 import { ic } from "../ui/symbole.js";
 
 export function loadLocal(){
-  var raw=null;
+  var raw;
   try{raw=localStorage.getItem(SPEICHER_KEY);}catch(e){return false;}
   if(!raw)return false;
   try{

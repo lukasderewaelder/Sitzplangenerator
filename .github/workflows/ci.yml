@@ -1,0 +1,43 @@
+name: Prüfen
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  pruefen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Unit-Tests
+        run: npm test
+      - name: Bauen
+        run: npm run build
+      - name: Gebauten Stand mit dem Repo vergleichen
+        run: |
+          if ! git diff --exit-code --stat -- index.html sw.js manifest.webmanifest icons; then
+            echo "::error::index.html/sw.js sind nicht aktuell. Lokal 'npm run build' ausführen und die Änderungen einchecken."
+            exit 1
+          fi
+      - name: Browser installieren
+        run: npx playwright install --with-deps chromium
+      - name: Browser-Tests (PC und iPad-Ansichten)
+        run: npm run test:e2e
+        env:
+          CI: "true"
+      - name: Testbericht sichern
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-spuren
+          path: test-results/
+          retention-days: 7

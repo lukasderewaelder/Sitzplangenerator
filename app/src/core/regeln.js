@@ -3,7 +3,6 @@ import { furniture } from "../ui/plan-ansicht.js";
 
 /* „Nah am Lehrertisch“ in zwei Stufen: Umkreis in Feldern, gemessen von der Platzmitte zum Lehrertisch */
 export var LEHRER_STUFEN={standard:{radius:4,name:"Standard",nah:4,start:2},weich:{radius:6,name:"weich",nah:2,start:1}};
-var LEHRER_RADIUS=LEHRER_STUFEN.standard.radius;
 /* ältere Pläne speichern true – das ist die Standard-Stufe */
 export function lehrerStufe(v){return(v===true||v==="standard")?"standard":(v==="weich"?"weich":false);}
 export function lehrerDaten(stu){var st=lehrerStufe(stu&&stu.lehrer);return st?LEHRER_STUFEN[st]:null;}
@@ -36,7 +35,4 @@ export function sName(id){return S.STU[id]?(S.ANZEIGE[id]||S.STU[id].name):"?";}
 export function tagById(id){for(var i=0;i<S.state.tags.length;i++)if(S.state.tags[i].id===id)return S.state.tags[i];return null;}
 export function inAnyGroup(id){
   return S.state.blacklist.concat(S.state.whitelist).some(function(g){return g.members.indexOf(id)!==-1;});
-}
-function sameGroup(list,a,b){
-  return list.some(function(g){return g.members.indexOf(a)!==-1&&g.members.indexOf(b)!==-1;});
 }

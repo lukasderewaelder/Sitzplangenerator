@@ -7,7 +7,7 @@ import { schritt } from "../io/speicher.js";
 import { S } from "../store.js";
 import { showTab } from "./bereiche.js";
 import { klassenZaehler } from "./klasse-schueler.js";
-import { ansage, toast } from "./meldungen.js";
+import { ansage, confirmBox, toast } from "./meldungen.js";
 import { personenFeld } from "./personenfeld.js";
 import { ic } from "./symbole.js";
 
@@ -58,7 +58,7 @@ function drawTagList(){
       if(FARBE_RE.test(this.value)){schritt("Farbe geändert");t.color=this.value;}drawTagList();
     };
     row.querySelector(".ib").onclick=function(){
-      S.confirmBox("Merkmal „"+t.name+"“ löschen? Es wird auch von allen Plätzen und Wünschen entfernt.",function(){
+      confirmBox("Merkmal „"+t.name+"“ löschen? Es wird auch von allen Plätzen und Wünschen entfernt.",function(){
         schritt("Platzmerkmal gelöscht");
         S.state.tags=S.state.tags.filter(function(x){return x.id!==t.id;});
         Object.keys(S.state.seatMeta).forEach(function(k){

@@ -16,17 +16,6 @@ function txMode(x,y,mode){
 }
 export function tx(x,y){return txMode(x,y,S.view);}
 /* Sitzbereich: über welche Spalten sich die Tische erstrecken */
-function seatSpan(){
-  var mn=null,mx=null;
-  S.state.tables.forEach(function(t){
-    tischZellen(t).forEach(function(c){
-      if(mn===null||c.x<mn)mn=c.x;
-      if(mx===null||c.x>mx)mx=c.x;
-    });
-  });
-  if(mn===null){mn=0;mx=S.state.room.cols-1;}
-  return{mn:mn,mx:mx,span:mx-mn+1};
-}
 /* Möbel (Tafel, Lehrertisch …): frei platzierbar, Beschriftung änderbar */
 export function furniture(){return S.state.room.furniture||(S.state.room.furniture=[]);}
 export function boxCells(kind,o,x,y){

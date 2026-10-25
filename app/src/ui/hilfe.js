@@ -9,7 +9,7 @@ export function renderHelpTab(){
   el("helpPane").innerHTML=`<div class="help hlayout">
 <aside class="hside" aria-label="Inhalt der Anleitung"><div class="hside-in">
   <div class="hside-head"><h2>Anleitung</h2><button type="button" class="btn sm" id="helpBack">${ic("chevL")}Zurück</button></div>
-  <p class="hside-sub">Alles zum Sitzplan-Generator – in der Reihenfolge, in der du typischerweise vorgehst.</p>
+  <p class="hside-sub">Alles zum Sitzplan-Generator – in der Reihenfolge, in der du typischerweise vorgehst.<br>Version ${__APP_VERSION__}</p>
   <div class="search hsearch">${ic("search")}<input type="search" id="helpSuche" placeholder="Anleitung durchsuchen" aria-label="Anleitung durchsuchen" aria-controls="hMain" autocomplete="off"></div>
   <p class="hfund" id="helpFund" aria-live="polite"></p>
   <nav class="toc" aria-label="Inhalt">
@@ -230,6 +230,13 @@ export function renderHelpTab(){
   <li>Für <strong>mehrere Klassen</strong> gibst du jeweils einen Plannamen ein und lädst pro Klasse eine Sicherung herunter. Der Browser merkt sich nur den zuletzt geöffneten Plan.</li>
 </ul>
 <div class="note">Der Browserspeicher gehört zu diesem Gerät. Lege von einem fertigen Plan eine Sicherung an – mit Hinweisen oder Leistungsstärken am besten verschlüsselt.</div>
+<h4>Als App installieren (PC und iPad)</h4>
+<ul>
+  <li><strong>iPad (Safari):</strong> Teilen-Symbol → „Zum Home-Bildschirm“. Die App startet dann ohne Browserleiste und auch ohne WLAN.</li>
+  <li><strong>PC (Chrome oder Edge):</strong> in der Adressleiste auf das Installieren-Symbol klicken (oder Menü → „App installieren“).</li>
+  <li>Die installierte App hat einen <strong>eigenen Speicher</strong>, getrennt vom Browser. Pläne aus dem Browser holst du dort mit „Sicherung herunterladen“ und in der App mit „Sicherung öffnen“.</li>
+  <li>Zwischen PC und iPad gelangen Pläne ebenfalls über die Sicherungsdatei (etwa über einen Cloud-Ordner wie iCloud Drive oder OneDrive).</li>
+</ul>
 </div>
 
 <div class="card" id="h13">
