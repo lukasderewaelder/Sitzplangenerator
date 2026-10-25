@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Sitzplan-Generator</title>
+</head>
+<body>
+<div class="app">
+<header class="appbar no-print">
+  <div class="ab-brand">
+    <span class="logo" aria-hidden="true"><svg class="ic" viewBox="0 0 24 24" data-ic="logo"></svg></span>
+    <div class="ab-titel">
+      <span class="ab-app">Sitzplan-Generator</span>
+      <input id="planName" class="plan-name" value="Sitzplan" aria-label="Name des Plans" spellcheck="false" autocomplete="off">
+    </div>
+  </div>
+  <nav class="tabs" role="tablist" aria-label="Bereiche">
+    <button class="tab on" data-tab="plan" role="tab" id="tabBtnPlan" aria-controls="tabPlan" aria-selected="true"><svg class="ic" viewBox="0 0 24 24" data-ic="logo" aria-hidden="true"></svg><span>Sitzplan</span></button>
+    <button class="tab" data-tab="room" role="tab" id="tabBtnRoom" aria-controls="tabRoom" aria-selected="false" tabindex="-1"><svg class="ic" viewBox="0 0 24 24" data-ic="room" aria-hidden="true"></svg><span>Raum</span></button>
+    <button class="tab" data-tab="class" role="tab" id="tabBtnClass" aria-controls="tabClass" aria-selected="false" tabindex="-1"><svg class="ic" viewBox="0 0 24 24" data-ic="users" aria-hidden="true"></svg><span>Klasse</span><span class="tablock" id="tabLock" hidden title="gesperrt"><svg class="ic" viewBox="0 0 24 24" data-ic="lock" aria-hidden="true"></svg><span class="sr-only">(gesperrt)</span></span></button>
+  </nav>
+  <div class="ab-actions">
+    <div class="histgroup">
+      <button id="btnUndo" class="btn icon ghost" title="Rückgängig (Strg+Z)" aria-label="Rückgängig" disabled><svg class="ic" viewBox="0 0 24 24" data-ic="undo" aria-hidden="true"></svg></button>
+      <button id="btnRedo" class="btn icon ghost" title="Wiederholen (Strg+Umschalt+Z)" aria-label="Wiederholen" disabled><svg class="ic" viewBox="0 0 24 24" data-ic="redo" aria-hidden="true"></svg></button>
+    </div>
+    <button id="saveStatus" class="savestat" type="button"><svg class="ic" viewBox="0 0 24 24" data-ic="check" aria-hidden="true"></svg><span class="ss-txt">Gespeichert</span></button>
+    <span class="ab-sep" aria-hidden="true"></span>
+    <button id="btnHelp" class="btn icon ghost" title="Anleitung" aria-label="Anleitung"><svg class="ic" viewBox="0 0 24 24" data-ic="help" aria-hidden="true"></svg></button>
+    <div class="menuwrap">
+      <button id="btnMenu" class="btn icon ghost" title="Weitere Funktionen" aria-label="Weitere Funktionen" aria-haspopup="menu" aria-expanded="false" aria-controls="menu"><svg class="ic" viewBox="0 0 24 24" data-ic="more" aria-hidden="true"></svg></button>
+      <div id="menu" class="menu" role="menu" aria-label="Weitere Funktionen" hidden>
+        <div class="menu-sec" role="presentation">Ausgabe</div>
+        <button role="menuitem" id="mPrint" type="button"><svg class="ic" viewBox="0 0 24 24" data-ic="print" aria-hidden="true"></svg>Drucken …<span class="kbdhint">Strg+P</span></button>
+        <button role="menuitem" id="mBeamer" type="button"><svg class="ic" viewBox="0 0 24 24" data-ic="beamer" aria-hidden="true"></svg>Beamer-Modus</button>
+        <div class="menu-sec" role="presentation">Sicherung</div>
+        <button role="menuitem" id="btnJson" type="button"><svg class="ic" viewBox="0 0 24 24" data-ic="download" aria-hidden="true"></svg>Sicherung herunterladen …</button>
+        <button role="menuitem" id="btnOpen" type="button"><svg class="ic" viewBox="0 0 24 24" data-ic="upload" aria-hidden="true"></svg>Sicherung öffnen …</button>
+        <div class="menu-sec" role="presentation">Schutz und Darstellung</div>
+        <button role="menuitem" id="btnLock" type="button"><svg class="ic" viewBox="0 0 24 24" data-ic="lock" aria-hidden="true"></svg><span id="btnLockTxt">Klasse sperren</span></button>
+        <button role="menuitem" id="btnTheme" type="button"><svg class="ic" viewBox="0 0 24 24" data-ic="contrast" aria-hidden="true"></svg><span id="btnThemeTxt">Darstellung: automatisch</span></button>
+        <div class="menu-sep" role="presentation"></div>
+        <button role="menuitem" id="mHelp" type="button"><svg class="ic" viewBox="0 0 24 24" data-ic="help" aria-hidden="true"></svg>Anleitung</button>
+        <button role="menuitem" id="btnNew" class="danger" type="button"><svg class="ic" viewBox="0 0 24 24" data-ic="fileplus" aria-hidden="true"></svg>Neuen leeren Plan beginnen …</button>
+      </div>
+    </div>
+    <button id="btnGen" class="btn primary" title="Neu anordnen"><svg class="ic" viewBox="0 0 24 24" data-ic="shuffle" aria-hidden="true"></svg><span>Neu anordnen</span></button>
+    <button id="btnBeamerExit" class="btn" type="button" hidden><svg class="ic" viewBox="0 0 24 24" data-ic="exit" aria-hidden="true"></svg><span>Beamer beenden</span></button>
+  </div>
+  <input type="file" id="fileIn" accept=".json,.txt,application/json,text/plain" hidden>
+</header>
+
+<div id="tabPlan" class="tabpane ws" role="tabpanel" aria-labelledby="tabBtnPlan">
+  <aside class="statuspanel no-print" id="statusPanel" aria-label="Status">
+    <div class="sp-head"><button id="spClose" class="btn icon ghost sm" type="button" aria-label="Status schließen"><svg class="ic" viewBox="0 0 24 24" data-ic="x" aria-hidden="true"></svg></button></div>
+    <section id="statusBox" aria-label="Überblick"></section>
+    <section>
+      <h2 class="sp-h">Nicht platziert <span id="upCount" class="count">0</span></h2>
+      <div id="unplaced" class="chips"></div>
+    </section>
+    <section>
+      <h2 class="sp-h">Im Plan anzeigen</h2>
+      <div id="optSummary" class="sw-list"></div>
+    </section>
+    <details class="legend-d" open>
+      <summary class="sp-h"><svg class="ic sm" viewBox="0 0 24 24" data-ic="chevR" aria-hidden="true"></svg>Legende</summary>
+      <div id="legend" class="legend"></div>
+    </details>
+  </aside>
+  <main class="canvas-col">
+    <div class="canvas-head"><div id="viewLabel" class="viewlabel"></div></div>
+    <div class="stage" id="stage">
+      <p id="roomHilfe" class="sr-only">Plätze mit Tabulator oder Pfeiltasten wählen. Eingabe: Person auswählen, dann Zielplatz wählen und erneut Eingabe drücken, um zu tauschen. F: Platz fixieren oder lösen. Entfernen: Person vom Platz nehmen. Escape: Auswahl aufheben.</p>
+      <div id="room" class="room" role="group" aria-label="Sitzplan" aria-describedby="roomHilfe"></div>
+    </div>
+    <div class="planbar no-print" role="toolbar" aria-label="Plan-Werkzeuge">
+      <button id="btnStatus" class="btn ghost statusbtn" type="button" aria-controls="statusPanel" aria-expanded="false"><svg class="ic" viewBox="0 0 24 24" data-ic="panel" aria-hidden="true"></svg><span id="statusKurz">Status</span></button>
+      <div class="seg" role="group" aria-label="Ansicht">
+        <button id="vTeacher" type="button" aria-pressed="true">Lehrersicht</button>
+        <button id="vStudent" type="button" aria-pressed="false">Schülersicht</button>
+      </div>
+      <span class="spacer"></span>
+      <div class="zoom" role="group" aria-label="Zoom">
+        <button id="zOut" class="btn icon ghost" type="button" aria-label="Verkleinern" title="Verkleinern"><svg class="ic" viewBox="0 0 24 24" data-ic="minus" aria-hidden="true"></svg></button>
+        <button id="zFit" class="btn ghost zval" type="button" title="An Fenster anpassen" aria-label="Zoom zurücksetzen">100 %</button>
+        <button id="zIn" class="btn icon ghost" type="button" aria-label="Vergrößern" title="Vergrößern"><svg class="ic" viewBox="0 0 24 24" data-ic="plus" aria-hidden="true"></svg></button>
+      </div>
+      <span class="bsep" aria-hidden="true"></span>
+      <button id="btnBeamer" class="btn ghost" type="button" title="Beamer-Modus: nur den Sitzplan zeigen, sensible Angaben ausblenden" aria-pressed="false"><svg class="ic" viewBox="0 0 24 24" data-ic="beamer" aria-hidden="true"></svg><span class="lbl">Beamer</span></button>
+      <button id="btnPrint" class="btn" type="button"><svg class="ic" viewBox="0 0 24 24" data-ic="print" aria-hidden="true"></svg><span class="lbl">Drucken</span></button>
+    </div>
+  </main>
+  <aside class="inspector no-print" id="inspector" aria-label="Auswahl"></aside>
+</div>
+
+<div id="tabRoom" class="tabpane ws-room no-print" role="tabpanel" aria-labelledby="tabBtnRoom" hidden><div id="roomPane" class="ws-inner"></div></div>
+<div id="tabClass" class="tabpane page no-print" role="tabpanel" aria-labelledby="tabBtnClass" hidden><div id="classPane" class="page-inner"></div></div>
+<div id="tabHelp" class="tabpane page no-print" role="region" aria-label="Anleitung" hidden><div id="helpPane" class="page-inner"></div></div>
+</div>
+
+<div id="printSheet" class="print-only"></div>
+<div id="toasts" class="toastwrap no-print" role="status" aria-live="polite"></div>
+<div id="ansage" class="sr-only" aria-live="polite"></div>
+
+<div id="ov" class="ov no-print" hidden>
+  <div class="modal" id="modalBox" role="dialog" aria-modal="true"><button class="x" id="modalX" aria-label="Schließen"><svg class="ic" viewBox="0 0 24 24" data-ic="x" aria-hidden="true"></svg></button><div id="modalBody"></div></div>
+</div>
+<div id="cov" class="ov top no-print" hidden>
+  <div class="modal" id="cBox" style="max-width:420px" role="alertdialog" aria-modal="true" aria-labelledby="cText">
+    <p id="cText" style="margin:2px 0 0;font-size:15.5px"></p>
+    <div class="modal-actions">
+      <button id="cNo" class="btn">Abbrechen</button><button id="cYes" class="btn primary">Ja</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>

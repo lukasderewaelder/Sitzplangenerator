@@ -1,0 +1,7 @@
+node_modules/
+test-results/
+playwright-report/
+*.log
+# Echte Sicherungen mit Schülerdaten gehören nie ins öffentliche Repo
+*.sitzplan.json
+Sitzplan_*.json

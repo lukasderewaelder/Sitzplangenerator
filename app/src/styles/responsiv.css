@@ -1,0 +1,53 @@
+  /* ===================== Tablet und kleinere Bildschirme ===================== */
+  @media (max-width:1279px){
+    .ws{grid-template-columns:minmax(0,1fr) 290px}
+    .statuspanel{position:fixed;left:0;top:0;bottom:0;width:300px;z-index:85;box-shadow:var(--shadow-lg);
+      transform:translateX(-105%);transition:transform .2s ease;visibility:hidden}
+    .ws.sp-open .statuspanel{transform:none;visibility:visible}
+    .sp-head{display:flex}
+    .statusbtn{display:inline-flex}
+    .savestat .ss-txt{display:none}
+  }
+  @media (max-width:1100px){
+    .tab{padding:0 12px}
+    .tab .ic{display:none}
+    .plan-name{width:160px}
+    #btnGen span{display:none}
+    #btnGen{width:var(--h);padding:0}
+    .ws-inner{grid-template-columns:minmax(0,1fr) 280px}
+    .planbar .lbl-opt{display:none}
+    .formgrid{grid-template-columns:1fr 1fr}
+  }
+  @media (max-width:799px){
+    .appbar{flex-wrap:wrap;padding:8px 10px;gap:8px}
+    .tabs{order:3;width:100%}
+    .tab{flex:1;justify-content:center}
+    .ab-actions{gap:2px}
+    .ab-sep{display:none}
+    .ws{grid-template-columns:minmax(0,1fr)}
+    .inspector{position:fixed;left:0;right:0;bottom:0;max-height:48vh;z-index:70;border-left:none;border-top:1px solid var(--border);
+      border-radius:18px 18px 0 0;box-shadow:var(--shadow-lg);padding-top:24px}
+    .inspector::before{content:"";position:absolute;top:9px;left:50%;width:42px;height:5px;margin-left:-21px;border-radius:3px;background:var(--border-strong)}
+    .ws:not(.has-sel) > .inspector{display:none}
+    .ws.has-sel .stage{padding-bottom:calc(48vh + 12px)}
+    .ws-inner{grid-template-columns:minmax(0,1fr)}
+    .ws-inner > .inspector{position:static;max-height:none;border-radius:0;box-shadow:none;border-top:1px solid var(--border)}
+    .ws-inner > .inspector::before{display:none}
+    .ws-inner{display:block;overflow-y:auto}
+    .ws-inner > .canvas-col{height:62vh;min-height:340px}
+    .planbar .lbl{display:none}
+    .page-inner{padding:16px 12px 60px}
+    .subtabs .ic{display:none}
+    .subtabs button{padding:0 10px}
+    .stu-headrow{display:none}
+    .stu-top{grid-template-columns:30px 28px minmax(0,1fr) minmax(0,1fr) 64px 40px;row-gap:0}
+    .duprow{grid-template-columns:1fr 1fr;row-gap:4px}
+    .tagpers{padding-left:0}
+    .stu-top .c-level,.stu-top .stu-flags,.stu-top .stu-rules{display:none}
+    .stu-det{padding-left:12px}
+    .formgrid{grid-template-columns:1fr}
+    .lrow2{grid-template-columns:22px minmax(0,1fr) 46px 40px}
+    .lrow2 .meta{display:none}
+    .toastwrap{bottom:20px}
+  }
+

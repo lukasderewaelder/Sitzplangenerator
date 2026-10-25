@@ -1,0 +1,641 @@
+{
+  "v": 4,
+  "planName": "Testklasse 7a",
+  "room": {
+    "cols": 10,
+    "rows": 12,
+    "furniture": [
+      {
+        "id": "f_6xtpd4a",
+        "type": "board",
+        "x": 2,
+        "y": 0,
+        "w": 6,
+        "label": "Tafel"
+      },
+      {
+        "id": "f_osjvrxv",
+        "type": "desk",
+        "x": 0,
+        "y": 0,
+        "w": 2,
+        "label": "Lehrertisch"
+      }
+    ]
+  },
+  "tables": [
+    {
+      "id": "t_cp7e4bj",
+      "x": 1,
+      "y": 2,
+      "seats": 2,
+      "dir": "h"
+    },
+    {
+      "id": "t_5bds1na",
+      "x": 4,
+      "y": 2,
+      "seats": 2,
+      "dir": "h"
+    },
+    {
+      "id": "t_tufegpl",
+      "x": 7,
+      "y": 2,
+      "seats": 2,
+      "dir": "h"
+    },
+    {
+      "id": "t_66615bm",
+      "x": 1,
+      "y": 4,
+      "seats": 2,
+      "dir": "h"
+    },
+    {
+      "id": "t_9b7pghk",
+      "x": 4,
+      "y": 4,
+      "seats": 2,
+      "dir": "h"
+    },
+    {
+      "id": "t_2pwvwsy",
+      "x": 7,
+      "y": 4,
+      "seats": 2,
+      "dir": "h"
+    },
+    {
+      "id": "t_gjr8i46",
+      "x": 1,
+      "y": 6,
+      "seats": 2,
+      "dir": "h"
+    },
+    {
+      "id": "t_tfq97li",
+      "x": 4,
+      "y": 6,
+      "seats": 2,
+      "dir": "h"
+    },
+    {
+      "id": "t_p8997zn",
+      "x": 7,
+      "y": 6,
+      "seats": 2,
+      "dir": "h"
+    },
+    {
+      "id": "t_r7ui0vt",
+      "x": 1,
+      "y": 8,
+      "seats": 2,
+      "dir": "h"
+    },
+    {
+      "id": "t_2iwhzsb",
+      "x": 4,
+      "y": 8,
+      "seats": 2,
+      "dir": "h"
+    },
+    {
+      "id": "t_258hob7",
+      "x": 7,
+      "y": 8,
+      "seats": 2,
+      "dir": "h"
+    },
+    {
+      "id": "t_is7y4gk",
+      "x": 1,
+      "y": 10,
+      "seats": 2,
+      "dir": "h"
+    },
+    {
+      "id": "t_d2opote",
+      "x": 4,
+      "y": 10,
+      "seats": 2,
+      "dir": "h"
+    },
+    {
+      "id": "t_7c81rhe",
+      "x": 7,
+      "y": 10,
+      "seats": 2,
+      "dir": "h"
+    }
+  ],
+  "seatMeta": {
+    "t_cp7e4bj#0": {
+      "tags": [
+        "t_fenster"
+      ],
+      "locked": false,
+      "blocked": false
+    },
+    "t_5bds1na#1": {
+      "tags": [
+        "t_fenster"
+      ],
+      "locked": false,
+      "blocked": false
+    },
+    "t_tufegpl#0": {
+      "tags": [],
+      "locked": false,
+      "blocked": true
+    },
+    "t_cp7e4bj#1": {
+      "tags": [],
+      "locked": false,
+      "blocked": false
+    },
+    "t_5bds1na#0": {
+      "tags": [],
+      "locked": false,
+      "blocked": false
+    },
+    "t_tufegpl#1": {
+      "tags": [],
+      "locked": false,
+      "blocked": false
+    },
+    "t_66615bm#0": {
+      "tags": [],
+      "locked": false,
+      "blocked": false
+    },
+    "t_66615bm#1": {
+      "tags": [],
+      "locked": false,
+      "blocked": false
+    },
+    "t_9b7pghk#0": {
+      "tags": [],
+      "locked": false,
+      "blocked": false
+    },
+    "t_9b7pghk#1": {
+      "tags": [],
+      "locked": false,
+      "blocked": false
+    },
+    "t_2pwvwsy#0": {
+      "tags": [],
+      "locked": false,
+      "blocked": false
+    },
+    "t_2pwvwsy#1": {
+      "tags": [],
+      "locked": false,
+      "blocked": false
+    },
+    "t_gjr8i46#0": {
+      "tags": [],
+      "locked": false,
+      "blocked": false
+    },
+    "t_gjr8i46#1": {
+      "tags": [],
+      "locked": false,
+      "blocked": false
+    },
+    "t_tfq97li#0": {
+      "tags": [],
+      "locked": false,
+      "blocked": false
+    },
+    "t_tfq97li#1": {
+      "tags": [],
+      "locked": false,
+      "blocked": false
+    },
+    "t_p8997zn#0": {
+      "tags": [],
+      "locked": false,
+      "blocked": false
+    },
+    "t_p8997zn#1": {
+      "tags": [],
+      "locked": false,
+      "blocked": false
+    },
+    "t_r7ui0vt#0": {
+      "tags": [],
+      "locked": false,
+      "blocked": false
+    },
+    "t_r7ui0vt#1": {
+      "tags": [],
+      "locked": false,
+      "blocked": false
+    },
+    "t_2iwhzsb#0": {
+      "tags": [],
+      "locked": false,
+      "blocked": false
+    },
+    "t_2iwhzsb#1": {
+      "tags": [],
+      "locked": false,
+      "blocked": false
+    },
+    "t_258hob7#0": {
+      "tags": [],
+      "locked": false,
+      "blocked": false
+    },
+    "t_258hob7#1": {
+      "tags": [],
+      "locked": false,
+      "blocked": false
+    },
+    "t_is7y4gk#0": {
+      "tags": [],
+      "locked": false,
+      "blocked": false
+    },
+    "t_is7y4gk#1": {
+      "tags": [],
+      "locked": false,
+      "blocked": false
+    },
+    "t_d2opote#0": {
+      "tags": [],
+      "locked": false,
+      "blocked": false
+    },
+    "t_d2opote#1": {
+      "tags": [],
+      "locked": false,
+      "blocked": false
+    },
+    "t_7c81rhe#0": {
+      "tags": [],
+      "locked": false,
+      "blocked": false
+    },
+    "t_7c81rhe#1": {
+      "tags": [],
+      "locked": false,
+      "blocked": false
+    }
+  },
+  "students": [
+    {
+      "id": "s_fix00",
+      "vorname": "Anna",
+      "nachname": "Adler",
+      "name": "Anna Adler",
+      "gender": "w",
+      "level": 1,
+      "requiredTags": [
+        "t_fenster"
+      ],
+      "note": "",
+      "solo": false,
+      "lehrer": false
+    },
+    {
+      "id": "s_fix01",
+      "vorname": "Ben",
+      "nachname": "Braun",
+      "name": "Ben Braun",
+      "gender": "m",
+      "level": 2,
+      "requiredTags": [],
+      "note": "",
+      "solo": false,
+      "lehrer": false
+    },
+    {
+      "id": "s_fix02",
+      "vorname": "Clara",
+      "nachname": "Conrad",
+      "name": "Clara Conrad",
+      "gender": "w",
+      "level": 3,
+      "requiredTags": [],
+      "note": "",
+      "solo": false,
+      "lehrer": "standard"
+    },
+    {
+      "id": "s_fix03",
+      "vorname": "David",
+      "nachname": "Dietz",
+      "name": "David Dietz",
+      "gender": "m",
+      "level": 1,
+      "requiredTags": [],
+      "note": "",
+      "solo": false,
+      "lehrer": false
+    },
+    {
+      "id": "s_fix04",
+      "vorname": "Elif",
+      "nachname": "Engel",
+      "name": "Elif Engel",
+      "gender": "d",
+      "level": 2,
+      "requiredTags": [],
+      "note": "Brille",
+      "solo": false,
+      "lehrer": false
+    },
+    {
+      "id": "s_fix05",
+      "vorname": "Felix",
+      "nachname": "Fuchs",
+      "name": "Felix Fuchs",
+      "gender": "m",
+      "level": 3,
+      "requiredTags": [],
+      "note": "",
+      "solo": false,
+      "lehrer": false
+    },
+    {
+      "id": "s_fix06",
+      "vorname": "Greta",
+      "nachname": "Graf",
+      "name": "Greta Graf",
+      "gender": "w",
+      "level": 1,
+      "requiredTags": [],
+      "note": "",
+      "solo": false,
+      "lehrer": false
+    },
+    {
+      "id": "s_fix07",
+      "vorname": "Hannes",
+      "nachname": "Hahn",
+      "name": "Hannes Hahn",
+      "gender": "m",
+      "level": 2,
+      "requiredTags": [],
+      "note": "",
+      "solo": true,
+      "lehrer": false
+    },
+    {
+      "id": "s_fix08",
+      "vorname": "Ida",
+      "nachname": "Imhof",
+      "name": "Ida Imhof",
+      "gender": "w",
+      "level": 3,
+      "requiredTags": [],
+      "note": "",
+      "solo": false,
+      "lehrer": false
+    },
+    {
+      "id": "s_fix09",
+      "vorname": "Jonas",
+      "nachname": "Jung",
+      "name": "Jonas Jung",
+      "gender": "m",
+      "level": 1,
+      "requiredTags": [],
+      "note": "",
+      "solo": false,
+      "lehrer": "standard"
+    },
+    {
+      "id": "s_fix10",
+      "vorname": "Kira",
+      "nachname": "Kunz",
+      "name": "Kira Kunz",
+      "gender": "w",
+      "level": 2,
+      "requiredTags": [],
+      "note": "",
+      "solo": false,
+      "lehrer": false
+    },
+    {
+      "id": "s_fix11",
+      "vorname": "Leon",
+      "nachname": "Lang",
+      "name": "Leon Lang",
+      "gender": "m",
+      "level": 3,
+      "requiredTags": [
+        "t_fenster"
+      ],
+      "note": "",
+      "solo": false,
+      "lehrer": false
+    },
+    {
+      "id": "s_fix12",
+      "vorname": "Mia",
+      "nachname": "Maier",
+      "name": "Mia Maier",
+      "gender": "w",
+      "level": 1,
+      "requiredTags": [],
+      "note": "",
+      "solo": false,
+      "lehrer": false
+    },
+    {
+      "id": "s_fix13",
+      "vorname": "Noah",
+      "nachname": "Nagel",
+      "name": "Noah Nagel",
+      "gender": "m",
+      "level": 2,
+      "requiredTags": [],
+      "note": "",
+      "solo": false,
+      "lehrer": false
+    },
+    {
+      "id": "s_fix14",
+      "vorname": "Olivia",
+      "nachname": "Ott",
+      "name": "Olivia Ott",
+      "gender": "w",
+      "level": 3,
+      "requiredTags": [],
+      "note": "",
+      "solo": false,
+      "lehrer": false
+    },
+    {
+      "id": "s_fix15",
+      "vorname": "Paul",
+      "nachname": "Pohl",
+      "name": "Paul Pohl",
+      "gender": "m",
+      "level": 1,
+      "requiredTags": [],
+      "note": "",
+      "solo": false,
+      "lehrer": false
+    },
+    {
+      "id": "s_fix16",
+      "vorname": "Quentin",
+      "nachname": "Quast",
+      "name": "Quentin Quast",
+      "gender": "m",
+      "level": 2,
+      "requiredTags": [],
+      "note": "",
+      "solo": false,
+      "lehrer": false
+    },
+    {
+      "id": "s_fix17",
+      "vorname": "Rosa",
+      "nachname": "Roth",
+      "name": "Rosa Roth",
+      "gender": "w",
+      "level": 3,
+      "requiredTags": [],
+      "note": "",
+      "solo": false,
+      "lehrer": false
+    },
+    {
+      "id": "s_fix18",
+      "vorname": "Sami",
+      "nachname": "Sauer",
+      "name": "Sami Sauer",
+      "gender": "m",
+      "level": 1,
+      "requiredTags": [],
+      "note": "",
+      "solo": false,
+      "lehrer": false
+    },
+    {
+      "id": "s_fix19",
+      "vorname": "Tina",
+      "nachname": "Thiel",
+      "name": "Tina Thiel",
+      "gender": "w",
+      "level": 2,
+      "requiredTags": [],
+      "note": "",
+      "solo": false,
+      "lehrer": false
+    },
+    {
+      "id": "s_fix20",
+      "vorname": "Uwe",
+      "nachname": "Ullrich",
+      "name": "Uwe Ullrich",
+      "gender": "m",
+      "level": 3,
+      "requiredTags": [],
+      "note": "",
+      "solo": false,
+      "lehrer": false
+    },
+    {
+      "id": "s_fix21",
+      "vorname": "Vera",
+      "nachname": "Voss",
+      "name": "Vera Voss",
+      "gender": "w",
+      "level": 1,
+      "requiredTags": [],
+      "note": "",
+      "solo": false,
+      "lehrer": false
+    },
+    {
+      "id": "s_fix22",
+      "vorname": "Wim",
+      "nachname": "Wolf",
+      "name": "Wim Wolf",
+      "gender": "m",
+      "level": 2,
+      "requiredTags": [],
+      "note": "",
+      "solo": false,
+      "lehrer": false
+    },
+    {
+      "id": "s_fix23",
+      "vorname": "Yara",
+      "nachname": "Yilmaz",
+      "name": "Yara Yilmaz",
+      "gender": "w",
+      "level": 3,
+      "requiredTags": [],
+      "note": "",
+      "solo": false,
+      "lehrer": false
+    }
+  ],
+  "tags": [
+    {
+      "id": "t_fenster",
+      "name": "Fenster",
+      "color": "#3d72a4"
+    }
+  ],
+  "blacklist": [
+    {
+      "id": "g_bl1",
+      "members": [
+        "s_fix01",
+        "s_fix05",
+        "s_fix09"
+      ],
+      "level": "moderat"
+    },
+    {
+      "id": "g_bl2",
+      "members": [
+        "s_fix03",
+        "s_fix04"
+      ],
+      "level": "moderat"
+    }
+  ],
+  "whitelist": [
+    {
+      "id": "g_wl1",
+      "members": [
+        "s_fix06",
+        "s_fix07"
+      ],
+      "level": "moderat"
+    }
+  ],
+  "arrangement": {},
+  "options": {
+    "gender": "mix",
+    "level": "off",
+    "solo": "off",
+    "showNotes": true,
+    "showGender": false,
+    "showLevel": false,
+    "nameFormat": "vornameN"
+  },
+  "roomTemplates": {
+    "B": null,
+    "C": null
+  },
+  "security": {
+    "hash": null,
+    "autolock": {
+      "min": 10,
+      "bg": true
+    }
+  },
+  "format": "sitzplan-sicherung"
+}

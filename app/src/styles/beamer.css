@@ -1,0 +1,7 @@
+  /* ===================== Beamer-Modus ===================== */
+  body.beamer .tabs,body.beamer .ab-actions > :not(#btnBeamerExit):not(#btnGen),body.beamer .statuspanel,body.beamer .inspector,
+  body.beamer .planbar{display:none!important}
+  body.beamer .ws{grid-template-columns:minmax(0,1fr)}
+  body.beamer .ab-app{display:none}
+  body.beamer .plan-name{font-size:20px}
+

@@ -1,0 +1,58 @@
+  /* ===================== Raum (Sitzplan) ===================== */
+  .room{position:relative;margin:auto;flex:0 0 auto;background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius-lg);box-shadow:var(--shadow-sm)}
+  .board{position:absolute;background:var(--board);color:var(--on-board);border-radius:7px;
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.08em;
+    text-transform:uppercase;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:0 8px}
+  .deskmark{position:absolute;background:var(--surface-2);border:1.5px dashed var(--border-strong);color:var(--muted);
+    border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;
+    overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding:0 6px}
+  .tbl{position:absolute;background:var(--table);border:0 solid var(--table-line)}
+  .seat{position:absolute;background:var(--seat);border:1.5px solid var(--seat-line);border-radius:9px;
+    padding:4px 5px;display:flex;flex-direction:column;justify-content:flex-start;cursor:pointer;touch-action:none;
+    user-select:none;-webkit-user-select:none;box-shadow:var(--shadow-sm);overflow:hidden;
+    transition:border-color var(--t),box-shadow var(--t),background var(--t)}
+  .seat:hover{border-color:var(--border-strong)}
+  .seat.sel{border-color:var(--sel);box-shadow:0 0 0 2px var(--sel),0 0 0 6px var(--sel-soft)}
+  .seat.dragsrc{opacity:.3}
+  .seat.dropok{outline:3px dashed var(--sel);outline-offset:-3px;background:var(--sel-soft)}
+  .seat.vb{border-color:var(--danger);background:var(--danger-soft)}
+  .seat.vs{border-color:var(--warn);background:var(--warn-soft)}
+  .seat.vw{border-color:var(--warn);border-style:dashed}
+  .seat.blocked{background:transparent;border-style:dashed;box-shadow:none;cursor:default;align-items:center;justify-content:center;color:var(--faint)}
+  .seat.blocked .ic{width:20px;height:20px}
+  .snm{font-weight:650;line-height:1.15;overflow:hidden;overflow-wrap:break-word;word-break:normal;
+    display:flex;align-items:center;justify-content:center;text-align:center;width:100%;flex:0 0 auto}
+  .sfree{color:var(--faint);font-weight:500;font-size:12px}
+  .snt{min-width:0;max-width:100%}
+  .ssub{line-height:1.2;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:4px;
+    overflow:hidden;white-space:nowrap;flex:0 0 auto;width:100%}
+  .sstxt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  .snote{line-height:1.2;color:var(--muted);text-align:center;overflow:hidden;overflow-wrap:anywhere;flex:0 0 auto;width:100%}
+  .smeta{display:flex;gap:3px;align-items:center;justify-content:flex-end;flex-wrap:nowrap;margin-top:auto;flex:0 0 auto;width:100%}
+  .stripe{position:absolute;left:0;right:0;top:0;height:5px;display:flex}
+  .stripe span{flex:1}
+  .seat.hasTag{padding-top:8px}
+  .seat.rot,.seat.rot.hasTag{padding:0;display:block}
+  .sdreh{position:absolute;display:flex;flex-direction:column;justify-content:flex-start;padding:4px 5px;overflow:hidden}
+  .seat.rot.hasTag .sdreh{padding-top:8px}
+  .seat.blocked .sdreh{align-items:center;justify-content:center}
+  .pin{display:inline-flex;align-items:center;justify-content:center;width:22px;height:18px;border-radius:5px;
+    color:var(--faint);opacity:.55;flex:0 0 auto;transition:opacity var(--t),background var(--t)}
+  .pin .ic{width:14px;height:14px}
+  .pin.corner{position:absolute;top:1px;right:1px}
+  .pin:hover{opacity:1;background:var(--surface-2);color:var(--text)}
+  .pin.on{opacity:1;color:var(--sel)}
+  .pin.on .ic{fill:currentColor}
+  .dragghost{position:fixed;z-index:200;pointer-events:none;background:var(--surface);
+    border:2px solid var(--sel);border-radius:10px;padding:8px 14px;font-weight:700;font-size:14px;
+    color:var(--text);box-shadow:var(--shadow-lg);transform:translate(-50%,-50%);
+    max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .flash{outline:3px solid var(--sel)!important;outline-offset:2px}
+  @media (prefers-reduced-motion:no-preference){
+    .flash{animation:flashBlink 1s ease-in-out 3}
+    @keyframes flashBlink{50%{outline-color:transparent}}
+    .menu,.modal,.inspector-sheet{animation:auftauchen .16s ease}
+    @keyframes auftauchen{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  }
+

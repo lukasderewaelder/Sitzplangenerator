@@ -1,0 +1,70 @@
+  /* ===================== Raum-Editor ===================== */
+  .edtoolbar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);
+    background:var(--surface);flex-wrap:wrap}
+  .tgroup{display:flex;align-items:center;gap:6px}
+  .tlabel{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);margin-right:2px}
+    .edframe{position:relative;margin:auto;flex:0 0 auto;padding:0 52px 56px}
+  .edgrip{position:absolute;display:flex;gap:8px;z-index:3}
+  .edgrip.gl{left:2px;top:50%;transform:translateY(-50%);flex-direction:column}
+  .edgrip.gr{right:2px;top:50%;transform:translateY(-50%);flex-direction:column}
+  .edgrip.gb{bottom:4px;left:50%;transform:translateX(-50%)}
+  .edgrip button{width:40px;height:40px;border-radius:50%;border:1px solid var(--border-strong);background:var(--surface);
+    color:var(--muted);display:inline-flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);
+    transition:background var(--t),color var(--t),border-color var(--t)}
+  .edgrip button.add{color:var(--sel-text);border-color:var(--sel);background:var(--sel-soft)}
+  .edgrip button:hover{background:var(--sel);border-color:var(--sel);color:#fff}
+  @media (pointer:coarse){.edgrip button{width:44px;height:44px}}
+  .tplsec{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);margin:4px 0 -2px}
+  .ed-canvas{position:relative;margin:0;background-color:var(--surface);flex:0 0 auto;
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:var(--cell,42px) var(--cell,42px);border:1px solid var(--border);border-radius:var(--radius);touch-action:none}
+  .et{position:absolute;background:var(--table);border:1.5px solid var(--table-line);border-radius:10px;cursor:grab;
+    touch-action:none;transition:box-shadow var(--t)}
+  .et:hover{box-shadow:var(--shadow)}
+  .et.bad{background:var(--danger-soft);border-color:var(--danger)}
+  .et.sel{outline:3px solid var(--sel);outline-offset:2px}
+  .et.drag{cursor:grabbing;opacity:.9;z-index:5;box-shadow:var(--shadow-lg)}
+  .seatdot{position:absolute;border-radius:7px;border:1.5px solid var(--seat-line);background:var(--seat);
+    display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);font-weight:700;cursor:pointer;
+    transition:box-shadow var(--t)}
+  .seatdot:hover{box-shadow:inset 0 0 0 2px var(--sel)}
+  .seatdot.cur{box-shadow:0 0 0 3px var(--sel)}
+  .seatdot.msel{background:var(--sel);border-color:var(--sel);color:#fff}
+  .seatdot.blk{background:repeating-linear-gradient(45deg,var(--surface-3) 0 4px,var(--seat) 4px 8px);color:var(--danger)}
+  .ed-board{position:absolute;background:var(--board);color:var(--on-board);border-radius:6px;
+    display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+  .ed-desk{position:absolute;background:var(--surface-2);border:2px dashed var(--border-strong);color:var(--muted);
+    border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:600}
+  .ed-board.sel,.ed-desk.sel{outline:3px solid var(--sel);outline-offset:2px}
+  .ed-board.bad,.ed-desk.bad{background:var(--danger-soft);border-color:var(--danger);color:var(--danger)}
+  .ed-board.drag,.ed-desk.drag{opacity:.9;z-index:6}
+  .ed-board,.ed-desk{cursor:grab;touch-action:none;overflow:hidden;white-space:nowrap;padding:0 4px;font-size:clamp(8px,calc(var(--cell,42px)*.3),11.5px)}
+  .ed-board>span,.ed-desk>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tplgrid{display:grid;grid-template-columns:1fr;gap:10px}
+  .tplcard{display:flex;gap:12px;align-items:center;padding:10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)}
+  .tplcard.leer{border-style:dashed}
+  .tplmini{width:84px;height:62px;flex:0 0 84px;border-radius:7px;background:var(--surface-2);display:flex;align-items:center;justify-content:center}
+  .tplmini svg{width:78px;height:56px}
+  .tplinfo{flex:1;min-width:0}
+  .tplinfo strong{display:block;font-size:14px;line-height:1.3}
+  .tplinfo span{font-size:12.5px;color:var(--muted)}
+  .tplinfo .rowf{margin-top:6px;gap:6px}
+  .seatlist{display:flex;flex-direction:column;gap:6px}
+  .seatlist button{display:flex;align-items:center;gap:10px;width:100%;min-height:var(--h);padding:6px 10px;border-radius:var(--radius);
+    border:1px solid var(--border);background:var(--surface);text-align:left;font-size:14px}
+  .seatlist button:hover{background:var(--surface-2)}
+  .seatlist .no{width:26px;height:26px;border-radius:7px;background:var(--surface-3);display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:0 0 26px}
+  .seatlist .info{color:var(--muted);font-size:13px}
+  .qlprev{background:var(--surface-2);border-radius:var(--radius);padding:10px;display:flex;justify-content:center;margin:12px 0}
+  .qlprev svg{max-width:100%;height:auto}
+
+  /* Umschalt-Chips (Merkmale, Gruppenmitglieder) */
+  .tgl{display:flex;flex-wrap:wrap;gap:6px}
+  .tg{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 12px;border-radius:999px;
+    border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:500;
+    transition:background var(--t),border-color var(--t),color var(--t)}
+  .tg:hover{background:var(--surface-2)}
+  .tg.on{color:#fff;border-color:transparent;font-weight:600}
+  .tg .x{opacity:.8}
+  @media (pointer:coarse){.tg{min-height:42px}}
+

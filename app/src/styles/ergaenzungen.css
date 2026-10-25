@@ -1,0 +1,4 @@
+  .btn.dangerfill{background:var(--danger);border-color:var(--danger);color:#fff}
+  .btn.dangerfill:hover{filter:brightness(.95);background:var(--danger)}
+  .savestat.err .ss-txt{display:inline!important}
+  .print-only{display:none}

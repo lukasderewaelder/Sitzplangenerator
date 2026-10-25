@@ -1,0 +1,7 @@
+  /* Schrift für Ausdruck und PDF. Ist „Century Gothic“ installiert (Windows, macOS mit Office), wird sie verwendet.
+     Sonst greift die eingebaute, fast gleich aussehende „Sitzplan Gothic“ – eine Teilmenge von TeX Gyre Adventor
+     (GUST e-foundry, GUST Font License), damit der Plan auf jedem Gerät, auch iPad und Chromebook, gleich aussieht. */
+  @font-face{font-family:"Sitzplan Gothic";font-style:normal;font-weight:100 550;font-display:block;
+    src:url(../assets/sitzplan-gothic-regular.woff) format("woff")}
+  @font-face{font-family:"Sitzplan Gothic";font-style:normal;font-weight:551 900;font-display:block;
+    src:url(../assets/sitzplan-gothic-bold.woff) format("woff")}

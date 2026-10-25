@@ -1,0 +1,33 @@
+  @media print{
+    .no-print,.app,.toastwrap,.ov{display:none!important}
+    html,body{height:auto}
+    /* Schrift im Ausdruck (auch PDF): Century Gothic, sonst die eingebaute „Sitzplan Gothic“ (siehe oben) */
+    body{background:#fff;color:#000;font-family:"Century Gothic",CenturyGothic,"Sitzplan Gothic",sans-serif}
+    .print-only{display:block}
+    .pp{page-break-after:always;break-after:page}
+    .pp:last-child{page-break-after:auto;break-after:auto}
+    .pp .head{font-size:8.5pt;color:#333;margin:0 0 3mm}
+    .proom{position:relative;margin:0 auto}
+    .pboard{position:absolute;border:.3mm solid #1a1a1a;background:#fff;color:#000;
+      display:flex;align-items:center;justify-content:center;font-weight:700;
+      overflow:hidden;white-space:nowrap}
+    .pdesk{position:absolute;border:.3mm solid #8a8a8a;background:#fff;color:#555;
+      display:flex;align-items:center;justify-content:center;overflow:hidden;white-space:nowrap}
+    .ptbl{position:absolute;border:.3mm solid #1a1a1a;background:#f1f1f1}
+    .pseat{position:absolute;display:flex;flex-direction:column;align-items:center;
+      justify-content:center;text-align:center;overflow:hidden;padding:.4mm .8mm}
+    .pseat{background:#f1f1f1;border:.3mm solid transparent}
+    .pseat.bL{border-left-color:#1a1a1a}
+    .pseat.bO{border-top-color:#1a1a1a}
+    .pseat.bR{border-right-color:#1a1a1a}
+    .pseat.bU{border-bottom-color:#1a1a1a}
+    .pseat.blk{background:#fff}
+    .pseat.rot{display:block;padding:0}
+    .pdreh{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      text-align:center;overflow:hidden;padding:.4mm .8mm}
+    .pseat .n{font-weight:700;line-height:1.1;overflow-wrap:break-word;word-break:normal;hyphens:manual;width:100%;
+      display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+    .pseat .t{color:#555;line-height:1.1;width:100%;overflow:hidden;white-space:nowrap}
+    .pseat .hw{line-height:1.15;width:100%;overflow:hidden;overflow-wrap:anywhere}
+    .plegend{margin-top:3mm;font-size:8pt;color:#555}
+  }
