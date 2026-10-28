@@ -4,10 +4,15 @@
     /* Schrift im Ausdruck (auch PDF): Century Gothic, sonst die eingebaute „Sitzplan Gothic“ (siehe oben) */
     body{background:#fff;color:#000;font-family:"Century Gothic",CenturyGothic,"Sitzplan Gothic",sans-serif}
     .print-only{display:block}
-    .pp{page-break-after:always;break-after:page}
+    /* Eine Seite = der bedruckbare Bereich (Seite abzüglich Rand). Der Plan sitzt mittig darin; Überschrift
+       und Legende stehen im Seitenrand, damit der Plan rundum denselben Abstand zum Papierrand hat. */
+    .pp{position:relative;page-break-after:always;break-after:page}
     .pp:last-child{page-break-after:auto;break-after:auto}
-    .pp .head{font-size:8.5pt;color:#333;margin:0 0 3mm}
-    .proom{position:relative;margin:0 auto}
+    .pp .head{position:absolute;left:0;right:0;top:-7mm;margin:0;font-size:8.5pt;line-height:1.2;color:#333;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .pbox{position:absolute;left:0;top:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center}
+    .proom{position:relative;flex:none}
+    .pinner{position:absolute}
     .pboard{position:absolute;border:.3mm solid #1a1a1a;background:#fff;color:#000;
       display:flex;align-items:center;justify-content:center;font-weight:700;
       overflow:hidden;white-space:nowrap}
@@ -29,5 +34,5 @@
       display:flex;align-items:center;justify-content:center;flex:0 0 auto}
     .pseat .t{color:#555;line-height:1.1;width:100%;overflow:hidden;white-space:nowrap}
     .pseat .hw{line-height:1.15;width:100%;overflow:hidden;overflow-wrap:anywhere}
-    .plegend{margin-top:3mm;font-size:8pt;color:#555}
+    .plegend{position:absolute;left:0;right:0;bottom:-7.5mm;margin:0;font-size:8pt;line-height:1.2;color:#555;white-space:nowrap}
   }

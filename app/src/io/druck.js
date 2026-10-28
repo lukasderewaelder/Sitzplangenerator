@@ -23,6 +23,20 @@ export function rawBounds(){
   if(minx===null){minx=0;maxx=S.state.room.cols-1;}
   return{minx:minx,maxx:maxx,miny:miny,maxy:maxy};
 }
+/* Für den Ausdruck: nur Zeilen und Spalten, in denen wirklich etwas steht (kein Platz für leere Randzeilen) */
+export function druckGrenzen(){
+  var minx=null,maxx=null,miny=null,maxy=null;
+  function mark(c){
+    if(minx===null||c.x<minx)minx=c.x;
+    if(maxx===null||c.x>maxx)maxx=c.x;
+    if(miny===null||c.y<miny)miny=c.y;
+    if(maxy===null||c.y>maxy)maxy=c.y;
+  }
+  S.state.tables.forEach(function(t){tischZellen(t).forEach(mark);});
+  furniture().forEach(function(f){boxCells("furniture",f,f.x,f.y).forEach(mark);});
+  if(minx===null){minx=0;maxx=S.state.room.cols-1;miny=0;maxy=1;}
+  return{minx:minx,maxx:maxx,miny:miny,maxy:maxy};
+}
 export function boundsFor(mode,raw){
   if(mode==="student")return raw;
   return{
@@ -80,7 +94,12 @@ function printViewHtml(mode,uw,uh,raw){
   function Y(cy){return L.ry[cy-L.miny]*uh;}
   function CW(cx){return L.cw[cx-L.minx]*uw;}
   function CH(cy){return L.rw[cy-L.miny]*uh;}
-  var html='<div class="proom" style="width:'+(L.totalW*uw)+"mm;height:"+(L.totalH*uh)+'mm">';
+  var html="";
+  /* tatsächlich belegte Fläche in mm (für den Zuschnitt) */
+  var ex={x0:Infinity,y0:Infinity,x1:-Infinity,y1:-Infinity};
+  function erweitern(x0,y0,x1,y1){
+    if(x0<ex.x0)ex.x0=x0;if(y0<ex.y0)ex.y0=y0;if(x1>ex.x1)ex.x1=x1;if(y1>ex.y1)ex.y1=y1;
+  }
 
   /* Tafel, Lehrertisch und weitere Möbel */
   furniture().forEach(function(f){
@@ -89,7 +108,8 @@ function printViewHtml(mode,uw,uh,raw){
     var GAP=Math.min(1.0,uw*0.04);
     var wmm=X(sp.r)+CW(sp.r)-X(sp.l)-2*GAP;
     var hmm=rowH*0.46;
-    var fsz=Math.min(3.2,hmm*0.55,fitMm(f.label,wmm,hmm,3.2));
+    var fsz=Math.min(4.2,hmm*0.55,fitMm(f.label,wmm,hmm,4.2));
+    erweitern(X(sp.l)+GAP,Y(sp.y)+rowH*0.27,X(sp.l)+GAP+wmm,Y(sp.y)+rowH*0.27+hmm);
     html+='<div class="'+(f.type==="board"?"pboard":"pdesk")+'" style="left:'+(X(sp.l)+GAP)+
           "mm;top:"+(Y(sp.y)+rowH*0.27)+"mm;width:"+wmm+"mm;height:"+hmm+"mm;font-size:"+
           fsz+'mm">'+esc(f.label)+"</div>";
@@ -115,8 +135,8 @@ function printViewHtml(mode,uw,uh,raw){
     z.x0=X(z.x)+(z.l?RANDX:0);z.x1=X(z.x)+cw-(z.r?RANDX:0);
     z.y0=Y(z.y)+(z.o?iy:0);z.y1=Y(z.y)+ch-(z.u?iy:0);
   });
-  var nameFs=Math.min(5.8,uw*0.28,uh*0.42);
-  var subFs=Math.min(2.6,uw*0.15,uh*0.2);
+  var nameFs=Math.min(8.5,uw*0.28,uh*0.42);
+  var subFs=Math.min(3.4,uw*0.15,uh*0.2);
   /* Einheitliches Raster: gleiche Bandhöhen und eine gemeinsame Schriftgröße
      für alle Plätze, damit die Namen auf einer Höhe stehen. */
   var minSh=Infinity,minSw=Infinity;
@@ -184,56 +204,69 @@ function printViewHtml(mode,uw,uh,raw){
   zellen.forEach(function(z){
     var key=seatKey(z.t.id,z.i),m=meta(key);
     var cls="pseat bR bU"+(z.l?" bL":"")+(z.o?" bO":"")+(m.blocked?" blk":"");
+    erweitern(z.x0,z.y0,z.x1,z.y1);
     html+='<div class="'+cls+'" style="left:'+z.x0+"mm;top:"+z.y0+"mm;width:"+(z.x1-z.x0)+"mm;height:"+(z.y1-z.y0)+'mm">'+inhalt(key)+"</div>";
   });
   /* gedrehte Tische: quadratische Plätze, gedreht; der Text steht waagrecht in der Mitte */
   dreh.forEach(function(z){
     var key=seatKey(z.t.id,z.i),m=meta(key),u=uw,quer=z.t.dir!=="v";
+    var halb=u*drehFaktor(z.w)/2;                            /* Hälfte der Breite des gedrehten Quadrats */
+    erweitern(z.cx-halb,z.cy-halb,z.cx+halb,z.cy+halb);
     var randPlatz=mode==="teacher"?z.t.seats-1:0;           /* in der Lehrersicht ist die Reihenfolge gespiegelt */
     var cls="pseat rot bR bU"+(quer?" bO":" bL")+(z.i===randPlatz?(quer?" bL":" bO"):"")+(m.blocked?" blk":"");
     html+='<div class="'+cls+'" style="left:'+(z.cx-u/2)+"mm;top:"+(z.cy-u/2)+"mm;width:"+u+"mm;height:"+u+"mm;transform:rotate("+z.w+'deg)">'+
       '<div class="pdreh" style="left:'+((u-z.inn)/2)+"mm;top:"+((u-z.inn)/2)+"mm;width:"+z.inn+"mm;height:"+z.inn+"mm;transform:rotate("+(-z.w)+'deg)">'+
       inhalt(key)+"</div></div>";
   });
-  html+="</div>";
   S.view=saved;
-  return html;
+  var rand=0.2;                                /* Linienstärke der Ränder mitnehmen */
+  if(!isFinite(ex.x0)){ex={x0:0,y0:0,x1:L.totalW*uw,y1:L.totalH*uh};rand=0;}
+  var w=ex.x1-ex.x0+2*rand,h=ex.y1-ex.y0+2*rand;
+  html='<div class="proom" style="width:'+w+"mm;height:"+h+'mm"><div class="pinner" style="left:'+(rand-ex.x0)+"mm;top:"+(rand-ex.y0)+
+       "mm;width:"+(L.totalW*uw)+"mm;height:"+(L.totalH*uh)+'mm">'+html+"</div></div>";
+  return{html:html,w:w,h:h};
 }
+/* Seitenrand ringsum (mm). Überschrift und Datum stehen im Rand, der Plan füllt den Rest. */
+var DRUCKRAND=12;
+var DRUCK_MAX=70;                            /* größte Kantenlänge eines Platzes (mm) */
 function preparePrint(wahl){
   wahl=(wahl==="lehrer"||wahl==="schueler")?wahl:"beide";
   reindex();
-  var raw=rawBounds();
-  /* Maße sind für beide Sichten gleich – einmal berechnen reicht */
-  var L=buildLayout(boundsFor("student",raw),"student",true);
-  var margin=10;
-  function fit(pw,ph){
-    var availW=pw-2*margin, availH=ph-2*margin-16;
-    /* gleiche Einheit in beiden Richtungen: jeder Platz ist ein Quadrat */
-    var u=Math.min(availW/L.totalW,availH/L.totalH,46);
-    return{uw:u,uh:u,flaeche:u*u};
+  var raw=druckGrenzen();
+  /* Zuschnitt auf die gezeichnete Fläche: einmal mit 10 mm je Einheit ausmessen, daraus die Größe bestimmen */
+  var mess=printViewHtml("student",10,10,raw);
+  function einheit(pw,ph){return Math.min((pw-2*DRUCKRAND)/mess.w,(ph-2*DRUCKRAND-0.4)/mess.h)*10;}
+  var uQuer=einheit(297,210),uHoch=einheit(210,297);
+  /* Querformat bevorzugen; Hochformat nur, wenn der Plan dort deutlich größer wird */
+  var landscape=!(uHoch>uQuer*1.1);
+  var pw=landscape?297:210,ph=landscape?210:297;
+  var availW=pw-2*DRUCKRAND,availH=ph-2*DRUCKRAND-0.4;
+  var u=Math.min(landscape?uQuer:uHoch,DRUCK_MAX);
+  /* Feinabgleich: Abstände zwischen Feldern wachsen nicht ganz gleichmäßig mit */
+  for(var i=0;i<4;i++){
+    var t=printViewHtml("student",u,u,raw);
+    var k=Math.min(availW/t.w,availH/t.h);
+    if(k<1)u*=k*0.9995;
+    else if(u<DRUCK_MAX&&k>1.002)u=Math.min(DRUCK_MAX,u*k*0.9995);
+    else break;
   }
-  var quer=fit(297,210), hoch=fit(210,297);
-  /* Querformat bevorzugen; Hochformat nur, wenn es deutlich mehr Platz bringt */
-  var landscape=!(hoch.flaeche>quer.flaeche*1.35);
-  var f=landscape?quer:hoch;
   var st=el("printPageStyle");
   if(!st){st=document.createElement("style");st.id="printPageStyle";document.head.appendChild(st);}
-  st.textContent="@media print{@page{size:A4 "+(landscape?"landscape":"portrait")+";margin:"+margin+"mm}}";
+  st.textContent="@media print{@page{size:A4 "+(landscape?"landscape":"portrait")+";margin:"+DRUCKRAND+"mm}}";
   var date=new Date().toLocaleDateString("de-DE");
-  var legend="";
   var extra=S.state.options.showLevel?"Leistungsstärke: stark · mittel · Unterstützung":"";
   var titel=esc(S.state.planName||"Sitzplan");
+  var seite='<div class="pp" style="width:'+availW+"mm;height:"+availH+'mm">';
   var out="";
   if(wahl!=="schueler")
-  out+='<div class="pp"><div class="head">'+titel+
-       " &middot; Lehrersicht (Blick von der Tafel in die Klasse) &middot; "+date+"</div>"+
-       printViewHtml("teacher",f.uw,f.uh,raw)+
-       (legend||extra?'<div class="plegend">'+esc(legend)+esc(extra)+"</div>":"")+"</div>";
+  out+=seite+'<div class="head">'+titel+
+       " &middot; Lehrersicht (Blick von der Tafel in die Klasse) &middot; "+date+'</div><div class="pbox">'+
+       printViewHtml("teacher",u,u,raw).html+"</div>"+
+       (extra?'<div class="plegend">'+esc(extra)+"</div>":"")+"</div>";
   if(wahl!=="lehrer")
-  out+='<div class="pp"><div class="head">'+titel+
-       " &middot; Schülersicht (Blick nach vorn zur Tafel) &middot; "+date+"</div>"+
-       printViewHtml("student",f.uw,f.uh,raw)+
-       (legend?'<div class="plegend">'+esc(legend)+"</div>":"")+"</div>";
+  out+=seite+'<div class="head">'+titel+
+       " &middot; Schülersicht (Blick nach vorn zur Tafel) &middot; "+date+'</div><div class="pbox">'+
+       printViewHtml("student",u,u,raw).html+"</div></div>";
   el("printSheet").innerHTML=out;
 }
 
@@ -282,7 +315,7 @@ export function druckDialog(){
       return '<label><input type="radio" name="drWahl" value="'+wert+'"'+(w===wert?" checked":"")+"><span>"+text+"<small>"+sub+"</small></span></label>";
     }
     b.innerHTML="<h3>Drucken</h3>"+
-      '<p class="hint">Jede Sicht kommt auf eine eigene A4-Seite, meist im Querformat. Ein PDF entsteht im Druckfenster über „Als PDF speichern“.</p>'+
+      '<p class="hint">Jede Sicht kommt – auf die genutzte Fläche zugeschnitten und so groß wie möglich – auf eine eigene A4-Seite, meist im Querformat. Ein PDF entsteht im Druckfenster über „Als PDF speichern“.</p>'+
       '<div class="radiocards" role="radiogroup" aria-label="Was soll gedruckt werden?" style="margin:12px 0">'+
         wahlZeile("beide","Lehrer- und Schülersicht","2 Seiten")+
         wahlZeile("lehrer","nur Lehrersicht","für dich – mit eingeschalteten Zusatzangaben")+

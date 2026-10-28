@@ -1,6 +1,6 @@
 {
   "name": "sitzplangenerator",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "private": true,
   "type": "module",
   "description": "Sitzplan-Generator: Sitzpläne für Klassenräume erstellen, regelbasiert mischen und drucken.",

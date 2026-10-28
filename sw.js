@@ -3,7 +3,7 @@
    zwischengespeichert; ohne Netz (oder bei sehr langsamem Netz) startet die zuletzt gespeicherte Fassung.
    Dadurch läuft die App im Klassenraum auch ohne WLAN, und es gibt nie eine veraltete Mischung aus
    alter Seite und neuen Dateien. Alle Pläne liegen im Browserspeicher, nicht hier. */
-const VERSION = "4.0.1-e9eaa4cd39";
+const VERSION = "4.0.2-25437b00ba";
 const CACHE = "sitzplan-" + VERSION;
 const DATEIEN = [
   "./",

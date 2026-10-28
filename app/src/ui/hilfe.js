@@ -207,7 +207,7 @@ export function renderHelpTab(){
 
 <div class="card" id="h11">
 <h3>11. Drucken und als PDF sichern</h3>
-<p>${k("print","Drucken")} öffnet eine Auswahl: <strong>Lehrer- und Schülersicht</strong> (zwei Seiten), <strong>nur Lehrersicht</strong> oder <strong>nur Schülersicht</strong>. Die Wahl wird gemerkt, und der Dialog warnt, wenn die Lehrersicht Hinweise, Geschlecht oder Leistung enthält. Jede Sicht passt auf ein Blatt A4, meist im Querformat. Ein PDF entsteht im Druckfenster über „Als PDF speichern“.</p>
+<p>${k("print","Drucken")} öffnet eine Auswahl: <strong>Lehrer- und Schülersicht</strong> (zwei Seiten), <strong>nur Lehrersicht</strong> oder <strong>nur Schülersicht</strong>. Die Wahl wird gemerkt, und der Dialog warnt, wenn die Lehrersicht Hinweise, Geschlecht oder Leistung enthält. Jede Sicht passt auf ein Blatt A4, meist im Querformat. Der Plan wird auf die tatsächlich genutzte Fläche zugeschnitten, so groß wie möglich eingepasst und liegt mittig mit mindestens 12 mm Rand ringsum; Überschrift und Datum stehen im Rand. Ein PDF entsteht im Druckfenster über „Als PDF speichern“.</p>
 <ul>
   <li>Jeder Platz ist ein <strong>Quadrat</strong> – so sieht der Plan in jeder Raumform und Tischanordnung sauber aus. Direkt aneinandergestellte Tische bilden eine gemeinsame Fläche, gesperrte Plätze bleiben leer, Kopfzeile mit Planname, Sicht und Datum.</li>
   <li>Gedrehte Tische werden gedreht gedruckt, der Text steht aber immer waagrecht in der Mitte des Platzes.</li>
