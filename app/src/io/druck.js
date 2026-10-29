@@ -1,6 +1,6 @@
 import { el, esc } from "../core/basis.js";
 import { allSeats, drehFaktor, meta, seatKey, sitzMitte, tableCells, tischZellen } from "../core/geometrie.js";
-import { DRUCK_KEY, GENDERS, LEVEL_TXT } from "../core/konstanten.js";
+import { DRUCK_KEY, DRUCK_PASSEND_KEY, GENDERS, LEVEL_TXT } from "../core/konstanten.js";
 import { sName } from "../core/regeln.js";
 import { reindex } from "../core/zustand.js";
 import { sofortSichern } from "./speicher.js";
@@ -229,7 +229,7 @@ function printViewHtml(mode,uw,uh,raw){
 /* Seitenrand ringsum (mm). Überschrift und Datum stehen im Rand, der Plan füllt den Rest. */
 var DRUCKRAND=12;
 var DRUCK_MAX=70;                            /* größte Kantenlänge eines Platzes (mm) */
-function preparePrint(wahl){
+function preparePrint(wahl,passend){
   wahl=(wahl==="lehrer"||wahl==="schueler")?wahl:"beide";
   reindex();
   var raw=druckGrenzen();
@@ -250,23 +250,32 @@ function preparePrint(wahl){
     else if(u<DRUCK_MAX&&k>1.002)u=Math.min(DRUCK_MAX,u*k*0.9995);
     else break;
   }
+  var ansichtL=wahl!=="schueler"?printViewHtml("teacher",u,u,raw):null;
+  var ansichtS=wahl!=="lehrer"?printViewHtml("student",u,u,raw):null;
+  /* Seite = Plan plus Rand: dann sind alle vier Ränder genau gleich (gedacht für PDF) */
+  var seiteB=availW,seiteH=availH;
+  if(passend){
+    seiteB=Math.max(ansichtL?ansichtL.w:0,ansichtS?ansichtS.w:0);
+    seiteH=Math.max(ansichtL?ansichtL.h:0,ansichtS?ansichtS.h:0);
+  }
+  var seitenGroesse=passend?(seiteB+2*DRUCKRAND).toFixed(2)+"mm "+(seiteH+2*DRUCKRAND+0.2).toFixed(2)+"mm":"A4 "+(landscape?"landscape":"portrait");
   var st=el("printPageStyle");
   if(!st){st=document.createElement("style");st.id="printPageStyle";document.head.appendChild(st);}
-  st.textContent="@media print{@page{size:A4 "+(landscape?"landscape":"portrait")+";margin:"+DRUCKRAND+"mm}}";
+  st.textContent="@media print{@page{size:"+seitenGroesse+";margin:"+DRUCKRAND+"mm}}";
   var date=new Date().toLocaleDateString("de-DE");
   var extra=S.state.options.showLevel?"Leistungsstärke: stark · mittel · Unterstützung":"";
   var titel=esc(S.state.planName||"Sitzplan");
-  var seite='<div class="pp" style="width:'+availW+"mm;height:"+availH+'mm">';
+  var seite='<div class="pp" style="width:'+seiteB+"mm;height:"+seiteH+'mm">';
   var out="";
   if(wahl!=="schueler")
   out+=seite+'<div class="head">'+titel+
        " &middot; Lehrersicht (Blick von der Tafel in die Klasse) &middot; "+date+'</div><div class="pbox">'+
-       printViewHtml("teacher",u,u,raw).html+"</div>"+
+       ansichtL.html+"</div>"+
        (extra?'<div class="plegend">'+esc(extra)+"</div>":"")+"</div>";
   if(wahl!=="lehrer")
   out+=seite+'<div class="head">'+titel+
        " &middot; Schülersicht (Blick nach vorn zur Tafel) &middot; "+date+'</div><div class="pbox">'+
-       printViewHtml("student",u,u,raw).html+"</div></div>";
+       ansichtS.html+"</div></div>";
   el("printSheet").innerHTML=out;
 }
 
@@ -289,9 +298,12 @@ function druckWahl(){
   var w=null;try{w=localStorage.getItem(DRUCK_KEY);}catch(e){}
   return(w==="lehrer"||w==="schueler")?w:"beide";
 }
+function druckPassend(){
+  try{return localStorage.getItem(DRUCK_PASSEND_KEY)==="1";}catch(e){return false;}
+}
 function drucken(wahl){
   var los=function(){
-    preparePrint(wahl);S.druckBereit=true;
+    preparePrint(wahl,druckPassend());S.druckBereit=true;
     setTimeout(function(){
       try{window.print();}finally{S.druckBereit=false;}
     },80);
@@ -320,6 +332,8 @@ export function druckDialog(){
         wahlZeile("beide","Lehrer- und Schülersicht","2 Seiten")+
         wahlZeile("lehrer","nur Lehrersicht","für dich – mit eingeschalteten Zusatzangaben")+
         wahlZeile("schueler","nur Schülersicht","nur Namen – zum Aushängen")+"</div>"+
+      '<label class="check" style="margin:0 0 10px"><input type="checkbox" id="drPassend"'+(druckPassend()?" checked":"")+'><span>Seitengröße an den Plan anpassen (für PDF)'+
+        '<small>Die Seite wird so groß wie der Plan plus Rand – alle vier Ränder sind gleich. Zum Drucken auf Papier lieber ausschalten; Safari auf dem iPad kann die Seitengröße ignorieren.</small></span></label>'+
       '<div class="callout plain" id="drBox"><span id="drInfo" aria-live="polite"></span></div>'+
       '<div class="modal-actions"><button type="button" id="drAbbr" class="btn">Abbrechen</button>'+
       '<button type="button" id="drGo" class="btn primary">'+ic("print")+"Drucken</button></div>";
@@ -337,12 +351,12 @@ export function druckDialog(){
     el("drAbbr").onclick=closeModal;
     el("drGo").onclick=function(){
       var g=gewaehlt();
-      try{localStorage.setItem(DRUCK_KEY,g);}catch(e){}
+      try{localStorage.setItem(DRUCK_KEY,g);localStorage.setItem(DRUCK_PASSEND_KEY,el("drPassend").checked?"1":"0");}catch(e){}
       closeModal();drucken(g);
     };
   });
 }
 /* Auch Strg+P druckt ein vollständiges Blatt – im Beamer-Modus nur die Schülersicht */
 window.addEventListener("beforeprint",function(){
-  if(!S.druckBereit)preparePrint(S.beamer?"schueler":druckWahl());
+  if(!S.druckBereit)preparePrint(S.beamer?"schueler":druckWahl(),druckPassend());
 });

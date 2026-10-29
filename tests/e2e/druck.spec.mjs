@@ -114,4 +114,39 @@ test.describe("Ausdruck", () => {
     // der Plan beginnt unterhalb der Überschrift (die liegt 7 mm über dem bedruckbaren Bereich)
     expect(s[0].inhaltOben).toBeGreaterThanOrEqual(0);
   });
+
+  test("Option „Seitengröße an den Plan anpassen“: Seite = Plan plus Rand, alle Ränder gleich", async ({ page }) => {
+    await laden(page);
+    await page.evaluate(() => localStorage.setItem("sitzplan_druckpassend", "1"));
+    const { stil, seiten: s } = await seiten(page);
+    const m = /size:([0-9.]+)mm ([0-9.]+)mm/.exec(stil);
+    expect(m, stil).toBeTruthy();
+    const [seiteB, seiteH] = [Number(m[1]), Number(m[2])];
+    for (const sp of s) {
+      // Plan füllt den bedruckbaren Bereich vollständig: links = rechts = oben = unten = 0 innerhalb der Seite
+      for (const r of [sp.links, sp.rechts, sp.oben, sp.unten]) expect(Math.abs(r)).toBeLessThan(0.3);
+      // Seitengröße = Plan + 2 × Rand (unten 0,2 mm Spielraum gegen Rundung)
+      expect(Math.abs(seiteB - (sp.plan.b + 2 * RAND))).toBeLessThan(0.5);
+      expect(Math.abs(seiteH - (sp.plan.h + 2 * RAND)) ).toBeLessThan(0.6);
+      expect(Math.abs(sp.plan.b - sp.inhalt.b)).toBeLessThan(0.6);
+    }
+  });
+
+  test("Druckdialog: Option ist standardmäßig aus und wird gemerkt", async ({ page }) => {
+    await laden(page);
+    await page.evaluate(() => { window.print = () => {}; });
+    await page.locator("#btnMenu").click();
+    await page.locator("#mPrint").click();
+    const box = page.locator("#drPassend");
+    await expect(box).not.toBeChecked();
+    await box.check();
+    await page.locator("#drGo").click();
+    await expect.poll(() => page.evaluate(() => localStorage.getItem("sitzplan_druckpassend"))).toBe("1");
+    await page.locator("#btnMenu").click();
+    await page.locator("#mPrint").click();
+    await expect(page.locator("#drPassend")).toBeChecked();
+    await page.locator("#drPassend").uncheck();
+    await page.locator("#drGo").click();
+    await expect.poll(() => page.evaluate(() => localStorage.getItem("sitzplan_druckpassend"))).toBe("0");
+  });
 });

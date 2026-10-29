@@ -19,3 +19,4 @@ export var SCHEMA=4;
 export var SPEICHER_KEY="sitzplan_v2";              /* Schlüssel bleibt, damit vorhandene Pläne erhalten bleiben */
 export var BEAMER_KEY="sitzplan_beamer";
 export var DRUCK_KEY="sitzplan_druckwahl";
+export var DRUCK_PASSEND_KEY="sitzplan_druckpassend";
